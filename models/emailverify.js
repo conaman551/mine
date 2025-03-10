@@ -8,7 +8,7 @@ import { localAddress } from '../constants';
 const API_URL = localAddress
 
 function Emailverify({ route }) {
-    const userId = route.params.userId;
+    const email = route.params.email;
     const navigation = useNavigation();
     const [code, setCode] = useState(['', '', '', '', '', '']);
     const inputRefs = useRef([]);
@@ -17,17 +17,19 @@ function Emailverify({ route }) {
     const loadingAnimation = useRef(new Animated.Value(0)).current;
     const screenWidth = Dimensions.get('window').width;
 
+    const startAnimation = () => {
+        loadingAnimation.setValue(0);
+        Animated.loop(
+            Animated.timing(loadingAnimation, {
+                toValue: screenWidth * 0.18,
+                duration: 1500,
+                useNativeDriver: false,
+            })
+        ).start();
+    };
+
     useEffect(() => {
-        const startAnimation = () => {
-            loadingAnimation.setValue(0);
-            Animated.loop(
-                Animated.timing(loadingAnimation, {
-                    toValue: screenWidth * 0.18,
-                    duration: 1500,
-                    useNativeDriver: false,
-                })
-            ).start();
-        };
+        
     
         startAnimation();
     }, []);
@@ -41,8 +43,8 @@ function Emailverify({ route }) {
     };
 
     const handleChange = (text) => {
-        const newCode = text.split('').slice(0, 6);
-        setCode(newCode.concat(new Array(6 - newCode.length).fill('')));
+        const newCode = text.split('').slice(0, 5);
+        setCode(newCode.concat(new Array(5 - newCode.length).fill('')));
 
         const firstEmptyIndex = newCode.findIndex(digit => digit === '');
         if (firstEmptyIndex !== -1) {
@@ -66,15 +68,16 @@ function Emailverify({ route }) {
     const isCodeComplete = code.every(digit => digit !== '');
 
     const handleSubmit = async () => {
+        startAnimation();
         if (isCodeComplete) {
             const verificationCode = code.join('');
             const payload = {
-                uid : userId,
+                email : email,
                 code : verificationCode
             }
             console.log(verificationCode) //To remove
             try{
-                const response = await fetch(`${API_URL}/users/check-code`, {
+                const response = await fetch(`${API_URL}/auth/emailVerify`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -82,7 +85,8 @@ function Emailverify({ route }) {
                     body: JSON.stringify(payload),
                 })
                 if (response.ok){
-                    navigation.navigate('Password', {userId : userId});
+                    console.log('email verified')
+                    //navigation.navigate('Password', {userId : userId});
                 }
                 else{
                     console.log('Try again')
@@ -133,14 +137,14 @@ function Emailverify({ route }) {
                     onChangeText={handleChange}
                     onKeyPress={handleKeyPress}
                     keyboardType="number-pad"
-                    maxLength={6}
+                    maxLength={5}
                     ref={invisibleInputRef}
                 />
 
                 <TouchableOpacity 
                     style={[styles.submitButton, isCodeComplete ? styles.activeButton : styles.disabledButton]}
                     disabled={!isCodeComplete}
-                    onPress={handleSubmit}
+                    onPress={()=>{handleSubmit()}}
                 >
                     <Text style={styles.submitButtonText}>Submit</Text>
                 </TouchableOpacity>

@@ -6,9 +6,9 @@ const db = require('../database_connector/databaseConnection');
 const API_KEY = 'YOUR_GOOGLE_MAPS_API_KEY'; // Ensure your API key is set
 
 // Load the AWS SDK for Node.js
-var AWS = require("aws-sdk");
+//var AWS = require("aws-sdk");
 // Set region
-AWS.config.update({ region: "ap-southeast-2" });
+//AWS.config.update({ region: "ap-southeast-2" });
 
 
 const crypto = require('crypto');
@@ -236,19 +236,7 @@ const submitNumber = async (req, res) => {
 	  PhoneNumber: countryCode + mobileNumber,
 	};
 
-	// Create promise and SNS service object
-	var publishTextPromise = new AWS.SNS({ apiVersion: "2010-03-31" })
-	  .publish(params)
-	  .promise();
-
-	// Handle promise's fulfilled/rejected states
-	publishTextPromise
-	  .then(function (data) {
-	    console.log("MessageID is " + data.MessageId);
-	  })
-	  .catch(function (err) {
-	    console.error(err, err.stack);
-	  });
+	
 
 	const result_verify = await db.client.query(
 	`UPDATE "USER"
@@ -383,29 +371,14 @@ const sendVariables = async (req,res) => {
 }
 
 const sendEmail = async (req,res)  => {
-    const { uid, emailAddress } = req.body;
+    const { emailAddress } = req.body;
 
     if (!emailAddress) {
         return res.status(400).json({ error: 'Email is required' });
     }
-	// Update database
     try {
-        const result = await db.client.query(
-        `UPDATE "USER"
-        SET "Email"=$1
-        WHERE "UID"=$2`
-            , [emailAddress, uid])
-        // Respond with success message
-	
-	const verificationCode = generateVerificationCode();
-	// Update database
-	const result_verify = await db.client.query(
-	`UPDATE "USER"
-	SET "Phone_number_verification"=$1
-	WHERE "UID"=$2
-		`
-	, [verificationCode.toString(), uid]);
-
+	    const verificationCode = generateVerificationCode();
+        
         return res.json({ message: 'Email successfully updated' });
     } catch (error) {
         // Respond with error message

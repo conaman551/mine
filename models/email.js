@@ -8,44 +8,47 @@ import { localAddress } from '../constants';
 const API_URL = localAddress
 
 function Email({ route }) {
-    const userId = route.params.userId;
+    //const userId = route.params.userId;
     const navigation = useNavigation();
     const [emailAddress, setEmailAddress] = useState('');
 
     const loadingAnimation = useRef(new Animated.Value(0)).current;
     const screenWidth = Dimensions.get('window').width;
+    const startAnimation = () => {
+        loadingAnimation.setValue(0);
+        Animated.loop(
+            Animated.timing(loadingAnimation, {
+                toValue: screenWidth * 0.09,
+                duration: 1500,
+                useNativeDriver: false,
+            })
+        ).start();
+    };
 
     useEffect(() => {
-        const startAnimation = () => {
-            loadingAnimation.setValue(0);
-            Animated.loop(
-                Animated.timing(loadingAnimation, {
-                    toValue: screenWidth * 0.09,
-                    duration: 1500,
-                    useNativeDriver: false,
-                })
-            ).start();
-        };
+        
     
         startAnimation();
     }, []);
 
     const handleVerify = async () => {
+        startAnimation();
         const payload = {
-            uid : userId,
-            emailAddress: emailAddress,
+          //  uid : userId,
+            email: emailAddress,
         };
         console.log(emailAddress) //To remove
         try{
-            const response = await fetch(`${API_URL}/users/submit-email`, {
-                method: 'PUT',
+            const response = await fetch(`${API_URL}/auth/requestVerification`, {
+                method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify(payload),
             })
             if (response.ok){
-                navigation.navigate('Emailverify', {userId : userId});
+                console.log('ok response',response)
+                navigation.navigate('Emailverify',{email:emailAddress});
             }
             else{
                 console.log(response)
@@ -87,7 +90,7 @@ function Email({ route }) {
             </View>
             <TouchableOpacity 
                 style={styles.verifyButton}
-                onPress={handleVerify}>
+                onPress={()=>{handleVerify()}}>
                 <Text style={styles.verifyButtonText}>Verify</Text>
             </TouchableOpacity>
 

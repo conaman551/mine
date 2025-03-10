@@ -7,20 +7,7 @@ import * as Font from 'expo-font';
 import { localAddress } from '../constants';
 import * as WebBrowser from 'expo-web-browser';
 
-
-const API_URL = localAddress
-
-function Landing() {
-    const navigation = useNavigation();
-    const [modalVisible, setModalVisible] = useState(true);
-
-    const [fontsLoaded] = Font.useFonts({
-        'Quick Love': require('../assets/QuickLove-gxeqP.ttf'),
-    });
-
-
-    const handleSubmit1 = async () => {
-        try{
+/*try{
             const response = await fetch(`${API_URL}/users/create-user`, {
                 method: 'POST',
                 headers: {
@@ -39,30 +26,26 @@ function Landing() {
         }
         catch (error) {
             console.log('Error', error);
-        }
+        } */
+
+
+const API_URL = localAddress
+
+function Landing() {
+    const navigation = useNavigation();
+    const [modalVisible, setModalVisible] = useState(true);
+
+    const [fontsLoaded] = Font.useFonts({
+        'Quick Love': require('../assets/QuickLove-gxeqP.ttf'),
+    });
+
+
+    const handleSubmit1 = () => {
+        navigation.navigate('Number',  {userId : 1});
     };
 
-    const handleSubmit2 = async () => {
-        try{
-            const response = await fetch(`${API_URL}/users/create-user`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: null,
-            })
-            .then(response => response.json())
-            .then(data => {
-                userId = data.uid
-                navigation.navigate('Email',  {userId : userId});
-            })
-            .catch((error => {
-                console.error('Error', error);
-            }))
-        }
-        catch (error) {
-            console.log('Error', error);
-        }
+    const handleSubmit2 = () => {
+        navigation.navigate('Email');
     };
 
     return (
