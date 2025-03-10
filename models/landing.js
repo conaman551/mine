@@ -1,0 +1,380 @@
+import React, { useState,useEffect } from 'react';
+import { Image, View, StyleSheet, Text, TouchableOpacity, Modal,Button } from "react-native";
+import { useNavigation } from '@react-navigation/native';
+import { heightPercentageToDP as hp, widthPercentageToDP as wp } from 'react-native-responsive-screen';
+import Icon from 'react-native-vector-icons/Ionicons';
+import * as Font from 'expo-font';
+import { localAddress } from '../constants';
+import * as WebBrowser from 'expo-web-browser';
+import { makeRedirectUri, useAuthRequest } from 'expo-auth-session';
+import * as dotenv from 'dotenv';
+
+dotenv.config();
+
+// Required to handle redirects in the browser
+WebBrowser.maybeCompleteAuthSession();
+
+const API_URL = localAddress
+
+function Landing() {
+    const navigation = useNavigation();
+    const [modalVisible, setModalVisible] = useState(true);
+
+    const [fontsLoaded] = Font.useFonts({
+        'Quick Love': require('../assets/QuickLove-gxeqP.ttf'),
+    });
+
+
+// Google OAuth endpoints
+const discovery = {
+  authorizationEndpoint: 'https://accounts.google.com/o/oauth2/v2/auth',
+  tokenEndpoint: 'https://oauth2.googleapis.com/token',
+};
+
+// Use Expo proxy for development
+//'https://trippr.org:3002/auth/google';
+const redirectUri = makeRedirectUri({
+    scheme: 'com.minedating', // Must match app.json
+    path: 'auth',         // Optional: adds /auth to the URI
+    useProxy: process.env.NODE_ENV === 'development' // Use proxy only in dev
+  });
+
+// Configure the auth request
+const [request, response, promptAsync] = useAuthRequest(
+//ios client id: 98488701953-k2a5b7jm3thb5kb8655s5vc5ipjl6j4g.apps.googleusercontent.com
+  {
+    clientId: '98488701953-amdak4k9185jfsk55n3djevk3egb3fjb.apps.googleusercontent.com',
+    redirectUri,
+    scopes: ['openid', 'profile', 'email'], // Permissions requested
+    responseType: 'code', // Authorization code flow
+  },
+  discovery
+);
+
+// Handle the response from Google
+useEffect(() => {
+  if (response?.type === 'success') {
+    const { code } = response.params;
+
+    // Send the code to your backend
+    fetch(`${API_URL}/auth/google`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ code }),
+    })
+      .then(res => res.json())
+      .then(data => {
+        // Handle successful login (e.g., store data.token in AsyncStorage)
+        console.log('JWT Token:', data.token);
+      })
+      .catch(error => console.error('Error:', error));
+  }
+}, [response]);
+
+
+    const handleSubmit1 = async () => {
+        try{
+            const response = await fetch(`${API_URL}/users/create-user`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: null,
+            })
+            .then(response => response.json())
+            .then(data => {
+                userId = data.uid
+                navigation.navigate('Number',  {userId : userId});
+            })
+            .catch((error => {
+                console.error('Error', error);
+            }))
+        }
+        catch (error) {
+            console.log('Error', error);
+        }
+    };
+
+    const handleSubmit2 = async () => {
+        try{
+            const response = await fetch(`${API_URL}/users/create-user`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: null,
+            })
+            .then(response => response.json())
+            .then(data => {
+                userId = data.uid
+                navigation.navigate('Email',  {userId : userId});
+            })
+            .catch((error => {
+                console.error('Error', error);
+            }))
+        }
+        catch (error) {
+            console.log('Error', error);
+        }
+    };
+
+    return (
+        <View style={styles.container}>
+            <Image 
+                source={require("../assets/mine-logo.png")} 
+                style={styles.logo} 
+                resizeMode="contain" 
+            />
+            <View style={styles.divider} />
+            <View style={styles.divider2} />
+            <View style={styles.titleContainer}>
+                <Text style={styles.title}>Make a</Text>
+                <Text style={styles.title}>Match,</Text>
+                <Text style={styles.title}>Make you</Text>
+                <Text style={styles.title}>Mine</Text>
+            </View>
+
+            <View style={styles.explain}>
+                <TouchableOpacity style={styles.explanationContainer} onPress={() => setModalVisible(true)}>
+                    <Text style={styles.explanationText}>Powered by a free and fair algorithm</Text>
+                    <Icon name="information-circle" size={16} color="grey" style={styles.infoIcon} />
+                </TouchableOpacity>
+            </View>
+
+            <Modal
+                visible={modalVisible}
+                transparent={true}
+                animationType="fade"
+                onRequestClose={() => setModalVisible(false)}>
+                <View style={styles.modalBackground}>
+                    <View style={styles.modalContainer}>
+                        <Image 
+                            source={require('../assets/phone.png')} // Add this line
+                            style={styles.modalImage} // Add a new style for the image
+                            resizeMode="contain" // Ensures the image fits well
+                        />
+                        <Text style={styles.modalText}>
+                            Our free and fair algorithm focuses on finding the best matches for you. We prioritize genuine compatibility over looks. Every match is thoughtfully chosen just for you.
+                        </Text>
+                        <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.closeButton}>
+                            <Text style={styles.closeButtonText}>Close</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </Modal>
+
+
+
+            <TouchableOpacity 
+                style={styles.button}
+                onPress={() => {
+                    handleSubmit1()}}>
+                <Icon name="call-outline" size={20} color="#fff" style={styles.icon} />
+                <Text style={styles.buttonText}>Use mobile number</Text>
+            </TouchableOpacity>
+            <Button
+      disabled={!request}
+      title="Sign in with Google"
+      onPress={() => promptAsync({ useProxy: true })}
+    />
+            <TouchableOpacity 
+                style={styles.secondaryButton} 
+                onPress={() => {
+                    handleSubmit2()}}>
+                <Icon name="mail-outline" size={20} color="#fff" style={styles.icon} />
+                <Text style={styles.buttonText}>Use email address</Text>
+            </TouchableOpacity>
+            
+            <View style={styles.orContainer}>
+                <View style={styles.orLine} />
+                <Text style={styles.orText}>or</Text>
+                <View style={styles.orLine} />
+            </View>
+
+            <TouchableOpacity 
+                style={styles.thirdButton} 
+                onPress={() => navigation.navigate('Login')}>
+                <Icon name="person-outline" size={20} color="#fff" style={styles.icon} />
+                <Text style={styles.buttonText}>I already have an account</Text>
+            </TouchableOpacity>
+        </View>
+    );
+}
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        alignItems: 'center', 
+        paddingTop : hp(3),
+        backgroundColor: '#FFFFFF',
+    },
+    logo: {
+        width: wp(24.4),
+        height: hp(12),
+        marginTop :hp(-0.3),
+    },
+    divider: {
+        marginTop :hp(-2),
+        width: '100%',
+        height: hp(0.6), 
+        backgroundColor: '#E8D1FF',
+    },
+    divider2: {
+        width: '100%',
+        height: hp(0.6), 
+        backgroundColor: '#E8D1FF',
+        marginVertical: hp(0.9),
+    },
+    titleContainer: {
+        marginTop: hp(5),
+        alignItems: 'flex-start',
+        marginLeft: wp(-12),
+
+        elevation: 7,
+    },
+    title: {
+        fontSize: wp(11),
+        color: '#FF69B4',
+        marginBottom: hp(3),
+        marginLeft: wp(13),
+        fontFamily: "Quick Love",
+        letterSpacing: 2,
+        textShadowColor: 'rgba(255, 105, 180, 0.8)',
+        textShadowOffset: { width: 2, height: 2 },
+        textShadowRadius: 4,
+        textAlign: 'center',
+        backgroundColor: 'transparent',
+        textTransform: 'none',
+        fontWeight: '600',
+    },
+    explain: {
+        marginTop: hp(1),
+    },
+    explanationContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    explanationText: {
+        color: 'grey',
+        fontSize: wp(3.8),
+        textAlign: 'center',
+    },
+    infoIcon: {
+        marginLeft: wp(1),
+    },
+    modalBackground: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+    },
+    modalContainer: {
+        width: wp(90),
+        height: wp(90),
+        borderRadius: wp(50), 
+        padding: hp(3),
+        backgroundColor: '#fff',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    modalImage: {
+        width: wp(50), 
+        height: wp(50),
+        marginTop : hp(-3)
+    },
+    modalText: {
+        fontSize: wp(3.5), 
+        color: '#444',
+        textAlign: 'center',
+        marginBottom: hp(2),
+        lineHeight: 20,
+        paddingHorizontal: hp(2), 
+        marginTop : hp(-3)
+    },
+    closeButton: {
+        paddingVertical: hp(1.5),
+        paddingHorizontal: wp(4),
+        backgroundColor: '#BD7CFF', 
+        borderRadius: 20,
+        elevation: 3,
+    },
+    
+    closeButtonText: {
+        color: '#FFFFFF',
+        fontWeight: 'bold',
+        fontSize: wp(4.2),
+    },
+    button: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginTop: hp(5),
+        width: wp(80),
+        height: hp(6),
+        backgroundColor: '#BD7CFF',
+        borderRadius: wp(13),
+        justifyContent: 'center',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: hp(0.5) },
+        shadowOpacity: 0.1,
+        shadowRadius: wp(2),
+        elevation: 5,
+    },
+    buttonText: {
+        color: '#FFFFFF',
+        fontSize: wp(4),
+        fontWeight: 'bold',
+        marginLeft: wp(2),
+    },
+    secondaryButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginTop: hp(2.3),
+        width: wp(80),
+        height: hp(6),
+        backgroundColor: '#BD7CFF',
+        borderRadius: wp(13),
+        justifyContent: 'center',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: hp(0.5) },
+        shadowOpacity: 0.1,
+        shadowRadius: wp(2),
+        elevation: 5,
+    },
+    thirdButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginTop: hp(2.3),
+        width: wp(80),
+        height: hp(6),
+        backgroundColor: '#BD7CFF',
+        borderRadius: wp(13),
+        justifyContent: 'center',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: hp(0.5) },
+        shadowOpacity: 0.1,
+        shadowRadius: wp(2),
+        elevation: 5,
+    },
+    orContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginTop: hp(2.3),
+        width: wp(80),
+        justifyContent: 'center',
+    },
+    orLine: {
+        height: 1,
+        backgroundColor: '#BD7CFF',
+        flex: 1,
+    },
+    orText: {
+        marginHorizontal: wp(3),
+        color: '#BD7CFF',
+        fontSize: wp(4),
+    },
+});
+
+export default Landing;
