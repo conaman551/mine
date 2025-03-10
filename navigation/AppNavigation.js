@@ -124,7 +124,7 @@ export default function AppNavigation(){
     };
 
     return(
-        <NavigationContainer>
+       
             <Stack.Navigator
                 //initialRouteName="HomeTabs"
                 initialRouteName= "Open"
@@ -241,6 +241,6 @@ export default function AppNavigation(){
                 />
             </Stack.Navigator>
             
-        </NavigationContainer>
+     
     );
 }

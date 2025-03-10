@@ -6,13 +6,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import * as Font from 'expo-font';
 import { localAddress } from '../constants';
 import * as WebBrowser from 'expo-web-browser';
-import { makeRedirectUri, useAuthRequest } from 'expo-auth-session';
-import * as dotenv from 'dotenv';
 
-dotenv.config();
-
-// Required to handle redirects in the browser
-WebBrowser.maybeCompleteAuthSession();
 
 const API_URL = localAddress
 
@@ -23,55 +17,6 @@ function Landing() {
     const [fontsLoaded] = Font.useFonts({
         'Quick Love': require('../assets/QuickLove-gxeqP.ttf'),
     });
-
-
-// Google OAuth endpoints
-const discovery = {
-  authorizationEndpoint: 'https://accounts.google.com/o/oauth2/v2/auth',
-  tokenEndpoint: 'https://oauth2.googleapis.com/token',
-};
-
-// Use Expo proxy for development
-//'https://trippr.org:3002/auth/google';
-const redirectUri = makeRedirectUri({
-    scheme: 'com.minedating', // Must match app.json
-    path: 'auth',         // Optional: adds /auth to the URI
-    useProxy: process.env.NODE_ENV === 'development' // Use proxy only in dev
-  });
-
-// Configure the auth request
-const [request, response, promptAsync] = useAuthRequest(
-//ios client id: 98488701953-k2a5b7jm3thb5kb8655s5vc5ipjl6j4g.apps.googleusercontent.com
-  {
-    clientId: '98488701953-amdak4k9185jfsk55n3djevk3egb3fjb.apps.googleusercontent.com',
-    redirectUri,
-    scopes: ['openid', 'profile', 'email'], // Permissions requested
-    responseType: 'code', // Authorization code flow
-  },
-  discovery
-);
-
-// Handle the response from Google
-useEffect(() => {
-  if (response?.type === 'success') {
-    const { code } = response.params;
-
-    // Send the code to your backend
-    fetch(`${API_URL}/auth/google`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ code }),
-    })
-      .then(res => res.json())
-      .then(data => {
-        // Handle successful login (e.g., store data.token in AsyncStorage)
-        console.log('JWT Token:', data.token);
-      })
-      .catch(error => console.error('Error:', error));
-  }
-}, [response]);
 
 
     const handleSubmit1 = async () => {
@@ -174,11 +119,7 @@ useEffect(() => {
                 <Icon name="call-outline" size={20} color="#fff" style={styles.icon} />
                 <Text style={styles.buttonText}>Use mobile number</Text>
             </TouchableOpacity>
-            <Button
-      disabled={!request}
-      title="Sign in with Google"
-      onPress={() => promptAsync({ useProxy: true })}
-    />
+        
             <TouchableOpacity 
                 style={styles.secondaryButton} 
                 onPress={() => {
