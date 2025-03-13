@@ -3,7 +3,7 @@ path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '../.env') });
 const { getRideRequest, changePaidStatus, addTransactionId } = require('../repository/rideBookingQueries')
 const { updateRideIsCompleted, recentlyCompleted, getRideByRideId, updateRidesSetCompleted } = require('../repository/rideQueries');
-const { getUserByDriverId, getUserByUserId, creditUserAccount } = require('../repository/userQueries');
+const { getUserByDriverId, getUserByUserId, creditUserAccount } = require('../repository/userRepo');
 const { deleteRecentEmptyRidesAndRequests, checkSeats } = require('../services/rideServices')
 const { getStripeIdByUserID, getValidPayouts, getPayout, setPayoutRefunded, creditDriver, createPayout, setPayoutCredited, getAkahuIdByUserID, getAkahuTokenByUserID, addAkahuId, addBankAccount, getBankAccountByUserID, getAkahuHook } = require('../repository/payment')
 const { sendNotification } = require('./notificationServices');

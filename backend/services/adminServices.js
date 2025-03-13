@@ -4,7 +4,7 @@ const {getPaypalPayoutTotal,getLatestAccounts,updatePaypalTransferred,createAcco
 const { pauseAccount, resumeAccount } = require('../repository/adminQueries');
 const { AkahuClient } = require('akahu');
 const { sendPaypalPayouts } = require('./paypalServices');
-const { getUserByUserId } = require('../repository/userQueries');
+const { getUserByUserId } = require('../repository/userRepo');
 const { getBankAccountByUserID, getPaypalEmail } = require('../repository/payment');
 
 const nodemailer = require('nodemailer');

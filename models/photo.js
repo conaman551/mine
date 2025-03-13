@@ -5,6 +5,7 @@ import * as ImagePicker from 'expo-image-picker';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { heightPercentageToDP as hp, widthPercentageToDP as wp } from 'react-native-responsive-screen';
 import { localAddress } from '../constants';
+import * as ImageManipulator from 'expo-image-manipulator';
 
 const API_URL = localAddress
 
@@ -64,15 +65,50 @@ function Photo({ route }) {
             mediaTypes: ImagePicker.MediaTypeOptions.Images,
             allowsEditing: true,
             aspect: [4, 3],
-            quality: 0.5,
-            base64: true,
+            quality: 1
         });
         // console.log(result)
         if (!result.canceled && result.assets && result.assets.length > 0) {
             const newImages = [...selectedImages];
-            const base64String = result.assets[0].base64;
-            newImages[index] = { base64: base64String };
+            const manipResult = await ImageManipulator.manipulateAsync(result.assets[0].uri, [{ resize: { width: 200, height: 150 } }], { compress: 1, format: ImageManipulator.SaveFormat.JPEG } );
+           let localUri = manipResult.uri;
+            newImages[index] = localUri;
             setSelectedImages(newImages);
+           let filename = localUri.split('/').pop();
+    // Infer the type of the image
+       let match = /\.(\w+)$/.exec(filename);
+     let type = match ? `image/${match[1]}` : `image`;
+    // Upload the image using the fetch and FormData APIs
+    let formData = new FormData();
+    // Assume "photo" is the name of the form field the server expects
+    formData.append('image', { uri: localUri, name: filename, type });
+    formData.append('uid', userId);
+    formData.append('categoryName', selectedCategory[index]);
+    ////JSON.stringify(localUri))
+    try{
+        const response = await fetch(`${API_URL}/images/update_category/${index + 1}/`, {
+        method: 'PUT',
+        body: formData,
+        headers: {
+            'content-type': 'multipart/form-data',
+        },
+    })
+    if (!response.ok) {
+        console.log('Try again')
+        return;
+       
+    }
+    else {
+        const res = await response.json()
+        console.log('url')
+        console.log(res.fileUrl)
+      //  saveProfilePic(res.fileUrl)
+    }
+
+        }
+            catch(error){
+                console.log('Error', error);
+            }
         }
     };
 
@@ -100,34 +136,9 @@ function Photo({ route }) {
             // navigation.navigate('Userlocation', {userId : userId}); //To remove
             return; //To remove
         }
+        navigation.navigate('Userlocation', {userId : userId});
         // console.log(selectedCategory) //To remove
         // console.log(selectedImages.map(image => image.base64)) //To remove
-        try{
-            // console.log(selectedImages);
-            for (let i = 1; i <= 4; i++) {
-            let data = {
-                data : selectedImages[i-1].base64,
-                filename : `Category_${i}_user_${userId}.jpg`,
-                uid : userId,
-                categoryName : selectedCategory[i-1],
-            };
-                let response = await fetch(`${API_URL}/images/update_category/${i}/`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(data),
-                })
-            if (!response.ok) {
-                return;
-                console.log('Try again')
-            }
-            }
-                navigation.navigate('Userlocation', {userId : userId});
-        }
-        catch(error){
-            console.log('Error', error);
-        }
     };
 
     return (
@@ -162,7 +173,7 @@ function Photo({ route }) {
                         onPress={() => handleImageUpload(index)}
                     >
                         {selectedImages[index] ? (
-                            <Image source={{ uri: `data:image/jpeg;base64,${selectedImages[index].base64}` }} style={styles.image} />
+                            <Image source={{ uri: selectedImages[index] }} style={styles.image} />
                         ) : (
                             <Text style={styles.plusText}>+</Text>
                         )}

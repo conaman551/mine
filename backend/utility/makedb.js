@@ -185,7 +185,7 @@ CREATE TABLE "public"."USER" (
     "Phone_number_verification" text,
     "Main_image_id" integer DEFAULT 1 NOT NULL,
     "Country_code" text,
-    "Email" text,
+    "email" text,
     "Smoking_tag" text,
     "Drinking_tag" text,
     CONSTRAINT "USER_Email" UNIQUE ("Email"),

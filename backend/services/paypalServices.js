@@ -3,7 +3,7 @@ path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '../.env') });
 const payoutsNodeJssdk = require('@paypal/payouts-sdk');
 const { getDriversByRequestedPayout, getPayoutsByDriverid, payoutrequested, getPaypalEmail, setPayoutPaid, zeroCredit } = require('../repository/payment');
-const { getUserByDriverId } = require('../repository/userQueries');
+const { getUserByDriverId } = require('../repository/userRepo');
 const { sendNotification } = require('./notificationServices');
 
 async function sendPaypalPayouts() {

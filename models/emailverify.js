@@ -4,6 +4,7 @@ import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { heightPercentageToDP as hp, widthPercentageToDP as wp } from 'react-native-responsive-screen';
 import { localAddress } from '../constants';
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const API_URL = localAddress
 
@@ -85,8 +86,31 @@ function Emailverify({ route }) {
                     body: JSON.stringify(payload),
                 })
                 if (response.ok){
-                    console.log('email verified')
-                    //navigation.navigate('Password', {userId : userId});
+                 //   console.log('email verified')
+                    const resp = await response.json()
+                    console.log(resp)
+                    if (resp.message === 'correct') {
+                       //store user token and userid here
+                       AsyncStorage.setItem("userToken", resp.token); 
+                       AsyncStorage.setItem("UID", String(resp.UID));  //Make into string
+                       if (!resp.existingUser) { //Reversed for testing
+                        navigation.navigate('HomeTabs', {userIdLogin : resp.UID})
+                       }
+                       else {
+                        navigation.navigate('Name', {userId :  resp.UID});
+                      //  navigation.navigate('Password', {userId : resp.uid}); //Removed password requirement for now
+                       }
+                    }
+                    else if (resp.message === 'wrong code') {
+                         console.log('wrong code')
+                    }
+                    else if (resp.message === 'timed out') {
+                      console.log('timed out')
+                    }
+                    else {
+
+                    }
+                    
                 }
                 else{
                     console.log('Try again')
@@ -103,7 +127,7 @@ function Emailverify({ route }) {
             <View style={styles.container}>
                 <TouchableOpacity
                     style={styles.backButton}
-                    onPress={() => navigation.navigate('Email', {userId : userId})} 
+                    onPress={() => navigation.navigate('Email')} 
                 >
                     <Icon name="arrow-back" size={45} color="#BD7CFF" />
                 </TouchableOpacity>
@@ -139,6 +163,7 @@ function Emailverify({ route }) {
                     keyboardType="number-pad"
                     maxLength={5}
                     ref={invisibleInputRef}
+                    
                 />
 
                 <TouchableOpacity 
@@ -216,7 +241,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         marginTop: hp(5.7),
-        width: wp(80),
+        width: wp(90),  
     },
     inputBox: {
         width: wp(12.1),
@@ -234,7 +259,7 @@ const styles = StyleSheet.create({
     },
     invisibleInput: {
         position: 'absolute',
-        opacity: 0,
+        opacity: 1,
     },
     submitButton: {
         marginTop: hp(5.6),

@@ -190,7 +190,7 @@ function Name({ route }) {
                 </View>
                 <TouchableOpacity 
                 style={styles.nextButton}
-                onPress={handleSubmit}>
+                onPress={()=>{handleSubmit()}}>
                     <Text style={styles.nextButtonText}>Next</Text>
                 </TouchableOpacity>
 

@@ -1,5 +1,5 @@
 const bcrypt = require('bcrypt');
-const { createUser, updateUserDetailsByEmail } = require('../repository/userQueries')
+const { createUser, updateUserDetailsByEmail } = require('../repository/userRepo')
 
 
 

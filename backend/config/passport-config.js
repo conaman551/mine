@@ -4,7 +4,7 @@
   const passport = require('passport')
   const JwtStrategy = require('passport-jwt').Strategy;
   const ExtractJwt = require('passport-jwt').ExtractJwt;
-  const { getUserByEmail } = require('../repository/userQueries')
+  const { getUserByEmail } = require('../repository/userRepo')
   const {  } = require('../services/userServices')
 
 

@@ -32,5 +32,5 @@ app.use('/chats', chatsRouter)
 app.use('/images', imagesRouter)
 
 
-app.listen(3002)
+app.listen(3000)
 

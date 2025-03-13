@@ -2,7 +2,7 @@ const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '../.env') });
 const { getCarByDriverId } = require('../repository/carQueries')
 const { createRide, deleteRecentEmptyRides, cancelRecentRegularRides, getRideByRideId } = require('../repository/rideQueries')
-const { getUserByDriverId, getUserByUserId } = require('../repository/userQueries')
+const { getUserByDriverId, getUserByUserId } = require('../repository/userRepo')
 const {getAverageRating } = require('../repository/reviewQueries')
 
 const { deleteIgnoredRidesRequests } = require('../repository/rideBookingQueries')

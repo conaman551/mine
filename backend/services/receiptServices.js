@@ -2,7 +2,7 @@ const { getDriverByDriverId, updateRidesDrivenByDriverId} = require('../reposito
 const { createReceipt, getReceiptByRide } = require('../repository/receiptQueries')
 const { getAcceptedRideRequests } = require('../repository/rideBookingQueries')
 const { updatePriceByRideId, getRideByRideId } = require('../repository/rideQueries')
-const { getUserByDriverId, getUserByUserId, updateRidesCompletedByUserId } = require('../repository/userQueries')
+const { getUserByDriverId, getUserByUserId, updateRidesCompletedByUserId } = require('../repository/userRepo')
 
 function getPassengerStripePay(driverPay) {
   let total;

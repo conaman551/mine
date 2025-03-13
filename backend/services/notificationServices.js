@@ -1,5 +1,5 @@
 const { Expo } = require('expo-server-sdk');
-const { getFirebaseToken, getUserByUserId } = require('../repository/userQueries')
+const { getFirebaseToken, getUserByUserId } = require('../repository/userRepo')
 const { SNSClient, PublishCommand, CheckIfPhoneNumberIsOptedOutInputFilterSensitiveLog } = require("@aws-sdk/client-sns");
 
 const expo = new Expo()

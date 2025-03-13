@@ -3,7 +3,7 @@ const express = require("express");
 const authRouter = express.Router();
 const jwt = require('jsonwebtoken'); 
 const { passport, jwtOptions } = require('../config/passport-config')
-const { getUserByEmail, getUserByUserId,addFirebaseToken,createCredentials, updatePasswordByEmail, getOauthUserID, addAppleUser, addAppleCredentials, getAppleEmail } = require('../repository/userQueries')
+const { getUserByEmail, getUserByUserId,addFirebaseToken,createCredentials, updatePasswordByEmail, getOauthUserID, addAppleUser, addAppleCredentials, getAppleEmail } = require('../repository/userRepo')
 const { validatePassword, generateUser, validEmail } = require('../services/userServices')
 // Set your secret key. Remember to switch to your live secret key in production.
 // See your keys here: https://dashboard.stripe.com/apikeys
@@ -14,6 +14,7 @@ const bcrypt = require("bcrypt");
 
 const nodemailer = require('nodemailer');
 const { getVersion } = require("../repository/adminQueries");
+const { createUser } = require("../repository/userRepo");
 let sentCodes = {}
 
 // Configure Nodemailer to use an email service
@@ -131,7 +132,7 @@ authRouter.post('/requestVerification', async(req, res) => {
     return  res.status(400).json({message:"Malformed Request", messageType:"JSONError"});
   }
   const email = req.body.email.toLowerCase();
-  let oauthid = await getOauthUserID(email)
+ /* let oauthid = await getOauthUserID(email)
   if (oauthid) {
   if (oauthid.google_id) {
     return  res.status(201).json({message:"google user", messageType:"user error"});
@@ -142,7 +143,7 @@ authRouter.post('/requestVerification', async(req, res) => {
   if (oauthid.apple_id) {
     return  res.status(201).json({message:"apple user", messageType:"user error"});
   }
-}
+} */
   const randomString = Math.floor(10000 + Math.random() * 90000); // Generate a 5 digit random number
  // const randomString = generateRandomString(6);
   //randomString); // Example output: 'aB3dE6f'
@@ -178,13 +179,27 @@ authRouter.post('/emailVerify', async(req,res) => {
     return res.status(400).json({message:'code is not a number', messageType:"InputError"})
   }*/
   const email = req.body.email.toLowerCase();
+  let existingUser = false;
+  let UID;
+  const user = await getUserByEmail(email);
+  if (user) {
+    existingUser = true;
+    UID = user.UID;
+  }
+  else {
+    //Create User
+   let newuser = await createUser(email,'new user')
+   UID = newuser.UID;
+  }
   const code = req.body.code;
   setTimeout(()=>{
   if (sentCodes[email]) {
-  if (sentCodes[email] === code) {
+  if (Number(sentCodes[email]) == Number(code)) { 
    // //`${sentCodes[email]} == ${code}`,'Javascript is cooked')
     delete sentCodes[email]
-    return res.status(201).json({message:'correct', messageType:"Accepted"})
+    let payload = {email: email};
+    let token = jwt.sign(payload, jwtOptions.secretOrKey);
+    res.json({message: "correct", token: token, existingUser:existingUser,UID:UID, messageType:"Accepted"});
   }
   else {
     return res.status(201).json({message:'wrong code', messageType:"Accepted"})
