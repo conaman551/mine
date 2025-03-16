@@ -4,7 +4,7 @@ const updateMain = async (filename,uid) => {
 	//const { data, filename, uid } = req.body;
 	try {
 		const result = await db.client.query(
-			`UPDATE "USER"
+			`UPDATE "users"
 			SET "Main_image_url"=$1
 			WHERE "UID"=$2
 			RETURNING *`, [filename, uid]
@@ -31,7 +31,7 @@ const updateCategory = async (req, res) => {
 
 	try {
 		const result = await db.client.query(
-			`UPDATE "USER"
+			`UPDATE "users"
 			SET "${string_cat_id}"=$1, "${string_cat_name}"=$3
 			WHERE "UID"=$2
 			RETURNING *`, [filename, uid, categoryName]

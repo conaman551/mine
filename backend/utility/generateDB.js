@@ -33,7 +33,7 @@ const execute = async (query) => {
 
 const text = `
 
-  CREATE TABLE IF NOT EXISTS "USER" (
+  CREATE TABLE IF NOT EXISTS "users" (
     "UID" SERIAL,
     "First_name" VARCHAR(100) NOT NULL,
     "Last_name" VARCHAR(50), 

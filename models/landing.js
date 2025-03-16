@@ -1,4 +1,4 @@
-import React, { useState,useEffect } from 'react';
+import React, { useState,useEffect,useContext } from 'react';
 import { Image, View, StyleSheet, Text, TouchableOpacity, Modal,Button } from "react-native";
 import { useNavigation } from '@react-navigation/native';
 import { heightPercentageToDP as hp, widthPercentageToDP as wp } from 'react-native-responsive-screen';
@@ -6,27 +6,8 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import * as Font from 'expo-font';
 import { localAddress } from '../constants';
 import * as WebBrowser from 'expo-web-browser';
-
-/*try{
-            const response = await fetch(`${API_URL}/users/create-user`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: null,
-            })
-            .then(response => response.json())
-            .then(data => {
-                userId = data.uid
-                navigation.navigate('Number',  {userId : userId});
-            })
-            .catch((error => {
-                console.error('Error', error);
-            }))
-        }
-        catch (error) {
-            console.log('Error', error);
-        } */
+import * as Linking from 'expo-linking';
+import { AuthContext } from "../context/AuthContext";
 
 
 const API_URL = localAddress
@@ -34,6 +15,7 @@ const API_URL = localAddress
 function Landing() {
     const navigation = useNavigation();
     const [modalVisible, setModalVisible] = useState(true);
+    const { login, Oauth, completeRegistration, resetRegistrationComplete } = useContext(AuthContext);
 
     const [fontsLoaded] = Font.useFonts({
         'Quick Love': require('../assets/QuickLove-gxeqP.ttf'),
@@ -47,6 +29,38 @@ function Landing() {
     const handleSubmit2 = () => {
         navigation.navigate('Email');
     };
+
+    
+const googleOauth = async () => {
+    //uri)
+    const result = await WebBrowser.openAuthSessionAsync(
+        `${BASE_URL}/auth/google/?redirect=` + uri, uri
+    );
+    if (result.type === "success") {
+        // get back the params from the url
+        const params = Linking.parse(result.url);
+
+        if (params.queryParams.correctlogin === 'true') {
+            if (params.queryParams.existingUser === 'true') {
+                Oauth(params.queryParams.token)
+                completeRegistration()
+            }
+            else {
+                await resetRegistrationComplete();
+                Oauth(params.queryParams.token)
+            }
+        }
+        else {
+            if (params.queryParams.shoulduse === 'email') {
+                Alert.alert("Your email has been used previously with email log in", "Please login via email");
+            }
+            if (params.queryParams.shoulduse === 'apple') {
+                Alert.alert("Your email has been used previously with apple sign in", "Please sign in via apple");
+            }
+        }
+
+    }
+}
 
     return (
         <View style={styles.container}>
@@ -93,14 +107,9 @@ function Landing() {
                 </View>
             </Modal>
 
-
-
-            <TouchableOpacity 
-                style={styles.button}
-                onPress={() => {
-                    handleSubmit1()}}>
-                <Icon name="call-outline" size={20} color="#fff" style={styles.icon} />
-                <Text style={styles.buttonText}>Use mobile number</Text>
+            <TouchableOpacity style={styles.button2} onPress={() => { googleOauth() }}>
+                    <Image style={{ width: 25, resizeMode: 'contain', marginHorizontal: 5, marginLeft: 30 }} source={require('../assets/google_g.png')} />
+                    <Text style={styles.button2Text}>Continue with Google</Text>
             </TouchableOpacity>
         
             <TouchableOpacity 
@@ -138,6 +147,20 @@ const styles = StyleSheet.create({
         width: wp(24.4),
         height: hp(12),
         marginTop :hp(-0.3),
+    },
+    button2: {
+        alignItems: "center",
+        flexDirection: 'row',
+        backgroundColor: '#131314',
+        borderRadius: 6,
+        height: 47, // Set the buttons height',
+        marginTop: 15,
+        width: 275,
+    },
+    button2Text: {
+        color: "white",
+        fontSize: 17,
+        fontWeight: 500
     },
     divider: {
         marginTop :hp(-2),

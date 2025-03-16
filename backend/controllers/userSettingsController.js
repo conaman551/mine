@@ -7,7 +7,7 @@ const updateImage = async (req, res) => {
     const fieldUpdate = "Category_" + number + "_image_url";
     try{
         const query = `
-        UPDATE "USER" 
+        UPDATE "users" 
         SET "${fieldUpdate}" = $1
         WHERE "UID" = $2
         RETURNING *`;
@@ -34,7 +34,7 @@ const updateCategory = async (req, res) => {
     const fieldUpdate = "Category_" + number + "_id";
     try{
         const query = `
-        UPDATE "USER" 
+        UPDATE "users" 
         SET "${fieldUpdate}" = $1
         WHERE "UID" = $2
         RETURNING *`;
@@ -57,7 +57,7 @@ const updateSmoking = async (req, res) => {
     const currentUserId = req.params.user_id; 
     try{
         const query = `
-        UPDATE "USER" 
+        UPDATE "users" 
         SET "Smoking_tag" = $1
         WHERE "UID" = $2
         RETURNING *`;
@@ -80,7 +80,7 @@ const updateDrinking = async (req, res) => {
     const currentUserId = req.params.user_id; 
     try{
         const query = `
-        UPDATE "USER" 
+        UPDATE "users" 
         SET "Drinking_tag" = $1
         WHERE "UID" = $2
         RETURNING *`;
@@ -103,7 +103,7 @@ const updateBio = async (req, res) => {
     const currentUserId = req.params.user_id; 
     try{
         const query = `
-        UPDATE "USER" 
+        UPDATE "users" 
         SET "Bio" = $1
         WHERE "UID" = $2
         RETURNING *`;
@@ -125,7 +125,7 @@ const updateLocation = async (req, res) => {
     const currentUserId = req.params.user_id; 
     try{
         const query = `
-            UPDATE "USER" 
+            UPDATE "users" 
             SET "Latitude" = $1, "Longitude" = $2
             WHERE "UID" = $3
             RETURNING *`;
@@ -148,7 +148,7 @@ const updateGender = async (req, res) => {
     const currentUserId = req.params.user_id; 
     try{
         const query = `
-        UPDATE "USER" 
+        UPDATE "users" 
         SET "Gender" = $1
         WHERE "UID" = $2
         RETURNING *`;
@@ -170,7 +170,7 @@ const updateGenderPref = async (req, res) => {
     const currentUserId = req.params.user_id; 
     try{
         const query = `
-        UPDATE "USER" 
+        UPDATE "users" 
         SET "Gender_pref" = $1
         WHERE "UID" = $2
         RETURNING *`;

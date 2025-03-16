@@ -282,30 +282,6 @@ authRouter.get("/google/callback",
     delete req.session.redirect;
 });
 
-//Facebook Oauth stuff below
-authRouter.get("/facebook", function(req, res, next) {
-  req.session.redirect = req.query.redirect;
- // //req.query.redirect)
-  next()
-},
-  passport.authenticate("facebook", {
-    scope: ['public_profile','email']
-       
-  })
-)
-authRouter.get("/facebook/callback", 
-  passport.authenticate("facebook", {
-  session: true
-}),
-function (req, res) {
-  if (req.user.correctlogin) {
-    res.send(`<script>window.location.replace("${req.user.callb}?existingUser=${req.user.existinguser}&name=${req.user.name}&token=${req.user.token}&correctlogin=${req.user.correctlogin}&picture=${req.user.picture}")</script>`)
-  }
-  else {
-    res.send(`<script>window.location.replace("${req.user.callb}?existingUser=${req.user.existinguser}&correctlogin=${req.user.correctlogin}&shoulduse=${req.user.shoulduse}")</script>`)
-  }
-  delete req.session.redirect;
-});
 
 
 authRouter.post("/registerPushToken",passport.authenticate('jwt', { session: false }), async (req, res) => {

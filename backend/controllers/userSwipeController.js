@@ -23,8 +23,8 @@ const getUserDetails = async (req, res) => {
         const query = `
             SELECT 
                 *,
-                EXTRACT(YEAR FROM AGE("USER"."DOB")) AS "Age"
-            FROM "USER"
+                EXTRACT(YEAR FROM AGE("users"."DOB")) AS "Age"
+            FROM "users"
             WHERE "UID" = $1
         `;
 
@@ -64,7 +64,7 @@ const getUserCards = async (req, res) => {
 
         // Get current user's location, age, gender, and gender preference
         const currentUserQuery = `SELECT "Latitude", "Longitude", EXTRACT(YEAR FROM AGE("DOB")) AS age, "Gender", "Gender_pref" 
-                                  FROM "USER" WHERE "UID" = $1`;
+                                  FROM "users" WHERE "UID" = $1`;
         const currentUserResult = await db.client.query(currentUserQuery, [currentUserId]);
         const currentUser = currentUserResult.rows[0];
 
@@ -77,28 +77,28 @@ const getUserCards = async (req, res) => {
         // Get potential users who match the age range and gender preference
         const potentialUsersQuery = `
             SELECT 
-                "USER"."UID", 
-                "USER"."First_name", 
-                "USER"."Last_name", 
-                "USER"."Latitude", 
-                "USER"."Longitude", 
-                EXTRACT(YEAR FROM AGE("USER"."DOB")) AS age, 
-                "USER"."Gender", 
-                "USER"."Gender_pref",
-		"USER"."Category_1_image_url",
-		"USER"."Category_2_image_url",
-		"USER"."Category_3_image_url",
-		"USER"."Category_4_image_url",
-                "USER"."Category_1_id", 
-                "USER"."Category_2_id", 
-                "USER"."Category_3_id", 
-                "USER"."Category_4_id",
-		"USER"."Bio"
-            FROM "USER"
-            WHERE "USER"."UID" != $1
+                "users"."UID", 
+                "users"."First_name", 
+                "users"."Last_name", 
+                "users"."Latitude", 
+                "users"."Longitude", 
+                EXTRACT(YEAR FROM AGE("users"."DOB")) AS age, 
+                "users"."Gender", 
+                "users"."Gender_pref",
+		"users"."Category_1_image_url",
+		"users"."Category_2_image_url",
+		"users"."Category_3_image_url",
+		"users"."Category_4_image_url",
+                "users"."Category_1_id", 
+                "users"."Category_2_id", 
+                "users"."Category_3_id", 
+                "users"."Category_4_id",
+		"users"."Bio"
+            FROM "users"
+            WHERE "users"."UID" != $1
             AND EXTRACT(YEAR FROM AGE("DOB")) BETWEEN $2 AND $3
-            AND "USER"."Gender" = $4
-            AND "USER"."Gender_pref" = $5
+            AND "users"."Gender" = $4
+            AND "users"."Gender_pref" = $5
         `;
         
         const potentialUsersResult = await db.client.query(potentialUsersQuery, [currentUserId, Minimum_age, Maximum_age, currentUserGenderPref, currentUserGender]);
@@ -311,16 +311,16 @@ const getMaybeList = async (req, res) => {
     try {
         const query = `
             SELECT 
-                "USER"."UID", 
-                "USER"."First_name", 
-                "USER"."Last_name", 
-                "USER"."Latitude", 
-                "USER"."Longitude", 
-                "USER"."Main_image_id",
-		"USER"."Category_1_image_url",
-                EXTRACT(YEAR FROM AGE("USER"."DOB")) AS "Age"
-            FROM "USER"
-            INNER JOIN "MAYBE" ON "USER"."UID" = "MAYBE"."UID2"
+                "users"."UID", 
+                "users"."First_name", 
+                "users"."Last_name", 
+                "users"."Latitude", 
+                "users"."Longitude", 
+                "users"."Main_image_id",
+		"users"."Category_1_image_url",
+                EXTRACT(YEAR FROM AGE("users"."DOB")) AS "Age"
+            FROM "users"
+            INNER JOIN "MAYBE" ON "users"."UID" = "MAYBE"."UID2"
             WHERE "MAYBE"."UID1" = $1
         `;
 
@@ -357,16 +357,16 @@ const getLikedList = async (req, res) => {
     try {
         const query = `
             SELECT 
-                "USER"."UID", 
-                "USER"."First_name", 
-                "USER"."Last_name", 
-                "USER"."Latitude", 
-                "USER"."Longitude", 
-                "USER"."Main_image_id",
-		"USER"."Category_1_image_url",
-                EXTRACT(YEAR FROM AGE("USER"."DOB")) AS "Age"
-            FROM "USER"
-            INNER JOIN "LIKES" ON "USER"."UID" = "LIKES"."UID1"
+                "users"."UID", 
+                "users"."First_name", 
+                "users"."Last_name", 
+                "users"."Latitude", 
+                "users"."Longitude", 
+                "users"."Main_image_id",
+		"users"."Category_1_image_url",
+                EXTRACT(YEAR FROM AGE("users"."DOB")) AS "Age"
+            FROM "users"
+            INNER JOIN "LIKES" ON "users"."UID" = "LIKES"."UID1"
             WHERE "LIKES"."UID2" = $1
         `;
 
@@ -400,15 +400,15 @@ const getMatchedList = async (req, res) => {
     try {
         const query = `
             SELECT 
-                "USER"."UID", 
-                "USER"."First_name", 
-                "USER"."Last_name", 
-                "USER"."Latitude", 
-                "USER"."Longitude", 
-                "USER"."Main_image_id",
-                EXTRACT(YEAR FROM AGE("USER"."DOB")) AS "Age"
-            FROM "USER"
-            INNER JOIN "MATCHED" ON "USER"."UID" = "MATCHED"."UID1"
+                "users"."UID", 
+                "users"."First_name", 
+                "users"."Last_name", 
+                "users"."Latitude", 
+                "users"."Longitude", 
+                "users"."Main_image_id",
+                EXTRACT(YEAR FROM AGE("users"."DOB")) AS "Age"
+            FROM "users"
+            INNER JOIN "MATCHED" ON "users"."UID" = "MATCHED"."UID1"
             WHERE "MATCHED"."UID2" = $1
             OR "MATCHED"."UID1" = $1
         `;

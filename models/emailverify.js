@@ -1,10 +1,12 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef,useContext } from 'react';
 import { Image, View, StyleSheet, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback, Animated, Dimensions } from "react-native";
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { heightPercentageToDP as hp, widthPercentageToDP as wp } from 'react-native-responsive-screen';
 import { localAddress } from '../constants';
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { AuthContext } from "../context/AuthContext";
+
 
 const API_URL = localAddress
 
@@ -14,6 +16,7 @@ function Emailverify({ route }) {
     const [code, setCode] = useState(['', '', '', '', '', '']);
     const inputRefs = useRef([]);
     const invisibleInputRef = useRef(null);
+    const { saveLoading,login } = useContext(AuthContext); //change to getFirstName
 
     const loadingAnimation = useRef(new Animated.Value(0)).current;
     const screenWidth = Dimensions.get('window').width;
@@ -30,14 +33,13 @@ function Emailverify({ route }) {
     };
 
     useEffect(() => {
-        
-    
+        saveLoading(false);
+      /*  if (invisibleInputRef.current) {
+            invisibleInputRef.current.focus();
+          } */
         startAnimation();
     }, []);
 
-    useEffect(() => {
-        invisibleInputRef.current?.focus();
-    }, []);
 
     const handleFocus = () => {
         invisibleInputRef.current?.focus();
@@ -69,7 +71,7 @@ function Emailverify({ route }) {
     const isCodeComplete = code.every(digit => digit !== '');
 
     const handleSubmit = async () => {
-        startAnimation();
+        saveLoading(true);
         if (isCodeComplete) {
             const verificationCode = code.join('');
             const payload = {
@@ -91,39 +93,44 @@ function Emailverify({ route }) {
                     console.log(resp)
                     if (resp.message === 'correct') {
                        //store user token and userid here
-                       AsyncStorage.setItem("userToken", resp.token); 
-                       AsyncStorage.setItem("UID", String(resp.UID));  //Make into string
+                       login(resp.token,String(resp.UID))
+                       
                        if (!resp.existingUser) { //Reversed for testing
-                        navigation.navigate('HomeTabs', {userIdLogin : resp.UID})
+                        navigation.navigate('HomeTabs')
+                        saveLoading(false);
                        }
                        else {
-                        navigation.navigate('Name', {userId :  resp.UID});
+                        navigation.navigate('Name');
                       //  navigation.navigate('Password', {userId : resp.uid}); //Removed password requirement for now
                        }
                     }
                     else if (resp.message === 'wrong code') {
                          console.log('wrong code')
+                         saveLoading(false);
                     }
                     else if (resp.message === 'timed out') {
                       console.log('timed out')
+                      saveLoading(false);
                     }
                     else {
-
+                        saveLoading(false);
                     }
                     
                 }
                 else{
                     console.log('Try again')
+                    saveLoading(false);
                 }
             }
             catch(error){
                 console.log('Error', error);
+                saveLoading(false);
             }
         }
     };
 
     return (
-        <TouchableWithoutFeedback onPress={handleFocus}>
+        <TouchableWithoutFeedback onPress={()=>{handleFocus()}}>
             <View style={styles.container}>
                 <TouchableOpacity
                     style={styles.backButton}
@@ -146,7 +153,7 @@ function Emailverify({ route }) {
                     {code.map((digit, index) => (
                         <TouchableOpacity 
                             key={index} 
-                            onPress={handleFocus} 
+                            onPress={()=>{handleFocus()}} 
                             activeOpacity={1}
                         >
                             <View style={styles.inputBox}>
@@ -259,7 +266,7 @@ const styles = StyleSheet.create({
     },
     invisibleInput: {
         position: 'absolute',
-        opacity: 1,
+        opacity: 0,
     },
     submitButton: {
         marginTop: hp(5.6),

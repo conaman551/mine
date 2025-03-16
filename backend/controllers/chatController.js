@@ -17,7 +17,7 @@ LEFT JOIN (
         FROM "MESSAGES"
         GROUP BY "Chat_id"
     )
-) AS m ON C."Chat_id" = m."Chat_id", "USER" AS U
+) AS m ON C."Chat_id" = m."Chat_id", "users" AS U
 WHERE ("UID1" = $1 AND "UID"="UID2") OR ("UID2" = $1 AND "UID"="UID1")`, [uid]);
         const chatListUsers = result.rows;
 
@@ -132,7 +132,7 @@ const reportUser = async (req, res) => {
 
         const userQuery = `
             SELECT "UID", "First_name", "Last_name", "Phone_number"
-            FROM "USER"
+            FROM "users"
             WHERE "UID" = $1 OR "UID" = $2`;
         const userResult = await db.client.query(userQuery, [uid1, uid2]);
 

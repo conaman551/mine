@@ -4,7 +4,7 @@ const bcrypt = require('bcrypt');
 
 async function createUserOld(name, email, password, phonenumber, biography) {
   hashedPassword = await bcrypt.hash(password, 1);
-  query = `INSERT INTO "USER" ("name", "email", "password", "phonenumber", "biography") VALUES ($1, $2, $3, $4, $5) RETURNING *`
+  query = `INSERT INTO "users" ("name", "email", "password", "phonenumber", "biography") VALUES ($1, $2, $3, $4, $5) RETURNING *`
   requirements = [name, email, hashedPassword, phonenumber, biography]
   const response = await queryDatabase(query, requirements)
   return response
@@ -15,7 +15,7 @@ async function createUserOld(name, email, password, phonenumber, biography) {
 const createUser = async (email,name) => {
     const reqs = [name,email]
     try {
-        const result = await queryDatabase(`INSERT INTO "USER" ("First_name", "email") VALUES ($1, $2) RETURNING *`,reqs)
+        const result = await queryDatabase(`INSERT INTO "users" ("First_name", "email") VALUES ($1, $2) RETURNING *`,reqs)
         console.log('new user',result)
         // Respond with success message
         return result[0]
@@ -31,7 +31,7 @@ async function deleteUser(UID) {
   let random = generateRandomString(7)
  // let randomnumber = generateNumber()
   let deleted = 'deleted'
-  const query = `UPDATE "USER"
+  const query = `UPDATE "users"
     SET email = $2,
     password = $2,
     dob = $3,
@@ -91,7 +91,7 @@ async function getOauthUserID(email) {
 }
 
 async function addAppleUser(name,email) {
-  const query1 = `INSERT INTO "USER" ("name","email") VALUES ($1,$2) RETURNING UID`
+  const query1 = `INSERT INTO "users" ("name","email") VALUES ($1,$2) RETURNING UID`
   const requirements1 = [name,email]
   let resp = await queryDatabase(query1, requirements1)
   return resp[0].UID
@@ -131,95 +131,95 @@ async function getFirebaseToken(UID) {
 
 
 async function getUserByUserId(UID) {
-  const query = `SELECT * FROM "USER" WHERE UID = ${UID}`
+  const query = `SELECT * FROM "users" WHERE UID = ${UID}`
   const user = await queryDatabase(query)
   return user[0];
 }
 
 async function getAllUsers() {
-  const query = `SELECT * FROM "USER"`
+  const query = `SELECT * FROM "users"`
   const user = await queryDatabase(query)
   return user;
 }
 
 async function getUserByDriverId(driverId) {
-  const query = `SELECT * FROM "USER" WHERE driverid = ${driverId}`
+  const query = `SELECT * FROM "users" WHERE driverid = ${driverId}`
   const user = await queryDatabase(query)
   return user[0];
 }
 
 async function getUserByEmail(email) {
-  const query = `SELECT * FROM "USER" WHERE "email" = $1`;
+  const query = `SELECT * FROM "users" WHERE "email" = $1`;
   const values = [email];
   const result = await queryDatabase(query, values);
   return result[0];
 }
 
 async function updateEmail(UID, email) {
-  query = `UPDATE "USER" SET email = $2 WHERE UID = $1 RETURNING *`
+  query = `UPDATE "users" SET email = $2 WHERE UID = $1 RETURNING *`
   requirements = [UID, email]
   const response = await queryDatabase(query, requirements)
   return response
 }
 
 async function addProfileImage(UID, image) {
-  query = `UPDATE "USER" SET profile_image = $2 WHERE UID = $1 RETURNING *`
+  query = `UPDATE "users" SET profile_image = $2 WHERE UID = $1 RETURNING *`
   requirements = [UID, image]
   const response = await queryDatabase(query, requirements)
   return response
 }
 
 async function addCarImage(UID, image) {
-  query = `UPDATE "USER" SET car_image = $2 WHERE UID = $1 RETURNING *`
+  query = `UPDATE "users" SET car_image = $2 WHERE UID = $1 RETURNING *`
   requirements = [UID, image]
   const response = await queryDatabase(query, requirements)
   return response
 }
 
 async function updateRating(UID,averagerating) {
- let query = `UPDATE "USER" SET averagerating = $2 WHERE UID = $1 RETURNING *`
+ let query = `UPDATE "users" SET averagerating = $2 WHERE UID = $1 RETURNING *`
   let requirements = [UID,averagerating]
   const response = await queryDatabase(query, requirements)
   return response
 }
 
 async function updateBiography(UID, biography) {
-  query = `UPDATE "USER" SET biography = $2 WHERE UID = $1 RETURNING *`
+  query = `UPDATE "users" SET biography = $2 WHERE UID = $1 RETURNING *`
   requirements = [UID, biography]
   const response = await queryDatabase(query, requirements)
   return response
 }
 
 async function updatePassword(UID, password) {
-  query = `UPDATE "USER" SET password = $2 WHERE UID = $1 RETURNING *`
+  query = `UPDATE "users" SET password = $2 WHERE UID = $1 RETURNING *`
   requirements = [UID, password]
   const response = await queryDatabase(query, requirements)
   return response
 }
 
 async function updatePhonenumber(UID, phonenumber) {
-  query = `UPDATE "USER" SET phonenumber = $2 WHERE UID = $1 RETURNING *`
+  query = `UPDATE "users" SET phonenumber = $2 WHERE UID = $1 RETURNING *`
   requirements = [UID, phonenumber]
   const response = await queryDatabase(query, requirements)
   return response
 }
 
 async function updatePasswordByEmail(email, password) {
-  query = `UPDATE "USER" SET password = $2 WHERE email = $1 RETURNING *`
+  query = `UPDATE "users" SET password = $2 WHERE email = $1 RETURNING *`
   requirements = [email, password]
   const response = await queryDatabase(query, requirements)
   return response
 }
 
 async function updateUserDetailsByEmail(email, name, phoneNumber) {
-  query = `UPDATE "USER" SET name = $2, phonenumber = $3 WHERE email = $1 RETURNING *`
+  query = `UPDATE "users" SET name = $2, phonenumber = $3 WHERE email = $1 RETURNING *`
   requirements = [email, name, phoneNumber]
   const response = await queryDatabase(query, requirements)
   return response
 }
 
 async function updateBiographyByEmail(email, biography) {
-  query = `UPDATE "USER" SET biography = $2 WHERE email = $1 RETURNING *`
+  query = `UPDATE "users" SET biography = $2 WHERE email = $1 RETURNING *`
   requirements = [email, biography]
   const response = await queryDatabase(query, requirements)
   return response
@@ -237,14 +237,14 @@ async function getCompletedRides(UID) {
 }
 
 async function updateRidesCompletedByUserId(UID) {
-  query = `UPDATE "USER" SET ridescompleted = ridescompleted + 1 WHERE UID = $1`
+  query = `UPDATE "users" SET ridescompleted = ridescompleted + 1 WHERE UID = $1`
   requirements = [UID]
   const response = await queryDatabase(query, requirements)
   return response
 }
 
 async function creditUserAccount(UID, amount) {
-  query = `UPDATE "USER" SET passengercredit = passengercredit + $2 WHERE UID = $1`
+  query = `UPDATE "users" SET passengercredit = passengercredit + $2 WHERE UID = $1`
   requirements = [UID, amount]
   const response = await queryDatabase(query, requirements)
   return response

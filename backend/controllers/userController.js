@@ -38,7 +38,7 @@ const login = async (req, res) => {
         // Find the user by phone number
         const result = await db.client.query(
         `SELECT "UID", "Password"
-        FROM "USER"
+        FROM "users"
         WHERE "Phone_number"=$1`
             , [number])
         const uid = result.rows[0]["UID"];
@@ -71,7 +71,7 @@ const submitGender = async (req, res) => {
 	// Update database
     try {
         const result = await db.client.query(
-        `UPDATE "USER"
+        `UPDATE "users"
         SET "Gender"=$1
         WHERE "UID"=$2`
             , [gender, uid])
@@ -96,7 +96,7 @@ const submitName = async (req, res) => {
     try {
         // Update database
         const result = await db.client.query(
-        `UPDATE "USER"
+        `UPDATE "users"
         SET "First_name"=$1, "Last_name"=$2
         WHERE "UID"=$3`
         , [firstName, surname, uid])
@@ -120,7 +120,7 @@ const submitPassword = async (req, res) => {
     try {
         // Update database
         const result = await db.client.query(
-        `UPDATE "USER"
+        `UPDATE "users"
         SET "Password"=$1
         WHERE "UID"=$2`
         , [password, uid])
@@ -145,7 +145,7 @@ const submitDob = async (req, res) => {
     try {
         // Update database
         const result = await db.client.query(
-        `UPDATE "USER"
+        `UPDATE "users"
         SET "DOB"=$1
         WHERE "UID"=$2`
             , [dob, uid])
@@ -171,7 +171,7 @@ const submitPreference = async (req, res) => {
     try {
         // Update database
         const result = await db.client.query(
-        `UPDATE "USER"
+        `UPDATE "users"
         SET "Gender_pref"=$1
         WHERE "UID"=$2`
             , [preference, uid])
@@ -197,7 +197,7 @@ const submitAddress = async (req, res) => {
     try {
         // Update database
         const result = await db.client.query(
-        `UPDATE "USER"
+        `UPDATE "users"
         SET "Latitude"=$1, "Longitude"=$2
         WHERE "UID"=$3`
             , [latitude, longitude, uid])
@@ -223,7 +223,7 @@ const submitNumber = async (req, res) => {
     try {
         // Update database
         const result = await db.client.query(
-        `UPDATE "USER"
+        `UPDATE "users"
         SET "Phone_number"=$1, "Country_code"=$2
         WHERE "UID"=$3`
             , [mobileNumber, countryCode, uid])
@@ -239,7 +239,7 @@ const submitNumber = async (req, res) => {
 	
 
 	const result_verify = await db.client.query(
-	`UPDATE "USER"
+	`UPDATE "users"
 	SET "Phone_number_verification"=$1
 	WHERE "UID"=$2
 		`
@@ -264,7 +264,7 @@ const checkCode = async (req, res) => {
         // Update database
         const result = await db.client.query(
         `SELECT "Phone_number_verification"
-        FROM "USER"
+        FROM "users"
         WHERE "UID"=$1`
             , [uid])
 
@@ -292,7 +292,7 @@ const submitBio = async (req, res) => {
     try {
         // Update database
         const result = await db.client.query(
-        `UPDATE "USER"
+        `UPDATE "users"
         SET "Bio"=$1
         WHERE "UID"=$2`
             , [bio, uid])
@@ -334,7 +334,7 @@ const submitUser = async (req, res) => {
     try {
         // Update database
         const result = await db.client.query(
-        `UPDATE "USER"
+        `UPDATE "users"
         SET "Valid"=TRUE
         WHERE "UID"=$1`
             , [uid])
@@ -357,7 +357,7 @@ const sendVariables = async (req,res) => {
     try {
         const result = await db.client.query(
             `SELECT *
-            FROM "USER"
+            FROM "users"
             WHERE "UID"=$1`,
             [uid]
         )
@@ -391,7 +391,7 @@ const deleteUser = async (req, res) => {
 	// Update database
     try {
         const result = await db.client.query(
-        `DELETE FROM "USER"
+        `DELETE FROM "users"
         WHERE "UID"=$1`
             , [uid])
         // Respond with success message

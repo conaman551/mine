@@ -1,17 +1,18 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef,useContext } from 'react';
 import { Image, View, StyleSheet, TouchableOpacity, Text, Animated, Dimensions } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { heightPercentageToDP as hp, widthPercentageToDP as wp } from 'react-native-responsive-screen';
 import { localAddress } from '../constants';
+import { AuthContext } from "../context/AuthContext";
 
 const API_URL = localAddress
 
 function Gender({ route }) {
-    const userId = route.params.userId;
+
     const navigation = useNavigation();
     const [selectedGender, setSelectedGender] = useState(null);
-
+    const {userID} = useContext(AuthContext); //change to getFirstName
     const loadingAnimation = useRef(new Animated.Value(0)).current;
     const screenWidth = Dimensions.get('window').width;
 
@@ -36,7 +37,7 @@ function Gender({ route }) {
 
     const handleSubmit = async () => {
         const data = { 
-            uid : userId,
+            uid : userID,
             gender: selectedGender 
         };
         console.log(selectedGender); // For testing purposes, remove in production
@@ -50,7 +51,7 @@ function Gender({ route }) {
                 body: JSON.stringify(data),
             })
             if(response.ok){
-                navigation.navigate('Preference', {userId : userId});
+                navigation.navigate('Preference');
             }
             else{
                 console.log('Try again')
@@ -84,7 +85,7 @@ function Gender({ route }) {
         <View style={styles.container}>
             <TouchableOpacity
                 style={styles.backButton}
-                onPress={() => navigation.navigate('Name', {userId : userId})}
+                onPress={() => navigation.navigate('Name')}
             >
                 <Icon name="arrow-back" size={45} color="#BD7CFF" />
             </TouchableOpacity>

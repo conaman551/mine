@@ -1,19 +1,21 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, Animated, Dimensions  } from 'react-native';
+import React, { useState, useEffect, useRef,useContext } from 'react';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, Animated, Dimensions, ActivityIndicator} from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { heightPercentageToDP as hp, widthPercentageToDP as wp } from 'react-native-responsive-screen';
 import { localAddress } from '../constants';
+import { AuthContext } from "../context/AuthContext";
+
 
 const API_URL = localAddress
 
 function Email({ route }) {
     //const userId = route.params.userId;
     const navigation = useNavigation();
-    const [emailAddress, setEmailAddress] = useState('');
-
+    const [emailAddress, setEmailAddress] = useState('');  
     const loadingAnimation = useRef(new Animated.Value(0)).current;
     const screenWidth = Dimensions.get('window').width;
+    const { saveLoading } = useContext(AuthContext); //change to getFirstName
     const startAnimation = () => {
         loadingAnimation.setValue(0);
         Animated.loop(
@@ -27,12 +29,12 @@ function Email({ route }) {
 
     useEffect(() => {
         
-    
+       // saveLoading(true);
         startAnimation();
     }, []);
 
     const handleVerify = async () => {
-        startAnimation();
+        saveLoading(true);
         const payload = {
           //  uid : userId,
             email: emailAddress,
@@ -48,15 +50,18 @@ function Email({ route }) {
             })
             if (response.ok){
                 console.log('ok response',response)
+                //Let user know if should use apple or google
                 navigation.navigate('Emailverify',{email:emailAddress});
             }
             else{
                 console.log(response)
                 console.log('Try again')
+                saveLoading(false);
             }
         }
         catch(error){
             console.log('Error', error);
+            saveLoading(false);
         }
     };
 

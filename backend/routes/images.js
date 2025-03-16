@@ -67,7 +67,7 @@ catch {
 
   const imageUrl = `${req.protocol}://${req.get('host')}/images/cat_images/${req.file.filename}`;
     await queryDatabase(
-          `UPDATE "USER"
+          `UPDATE "users"
           SET "${string_cat_id}"=$1, "${string_cat_name}"=$3
           WHERE "UID"=$2
           RETURNING *`, [imageUrl, uid, categoryName]

@@ -5,7 +5,9 @@ import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import AppNavigation from '../navigation/AppNavigation';
 import { useEffect } from 'react';
+import { AuthProvider } from '@/context/AuthContext';
 import 'react-native-reanimated';
+import Loading from "../components/Loading";
 
 import { useColorScheme } from '@/components/useColorScheme';
 
@@ -51,7 +53,10 @@ function RootLayoutNav() {
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+       <AuthProvider>
+        <Loading/>
       <AppNavigation/>
+      </AuthProvider>
     </ThemeProvider>
   );
 }

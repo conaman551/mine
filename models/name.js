@@ -1,19 +1,22 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef,useContext } from 'react';
 import { Image, View, StyleSheet, Text, TextInput, TouchableWithoutFeedback, Keyboard, TouchableOpacity, FlatList, Animated, Dimensions  } from "react-native";
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { heightPercentageToDP as hp, widthPercentageToDP as wp } from 'react-native-responsive-screen';
 import { localAddress } from '../constants';
+import { AuthContext } from "../context/AuthContext";
 
 const API_URL = localAddress
 
 function Name({ route }) {
-    const userId = route.params.userId;
+    
     const loadingAnimation = useRef(new Animated.Value(0)).current;
     const screenWidth = Dimensions.get('window').width;
     const navigation = useNavigation();
+     const { saveLoading,userID } = useContext(AuthContext); //change to getFirstName
 
     useEffect(() => {
+        saveLoading(false);
         const startAnimation = () => {
             loadingAnimation.setValue(0);
             Animated.loop(
@@ -51,14 +54,14 @@ function Name({ route }) {
 
     const handleSubmit = async () => {
         const name = {
-            uid: userId,
+            uid: userID,
             firstName : firstName,
             surname : surname,
         }
         console.log(selectedMonth);
         const monthIndex = months.indexOf(selectedMonth) + 1;
         const dob = {
-            uid: userId,
+            uid: userID,
             day : day,
             month: monthIndex,
             year: year,
@@ -83,7 +86,7 @@ function Name({ route }) {
                 body: JSON.stringify(dob)
             })
             if(response1.ok && response2.ok){
-                navigation.navigate('Gender', {userId : userId});//need change to num verify
+                navigation.navigate('Gender');//need change to num verify
             }
             else{
                 console.log('Try again')
@@ -100,7 +103,7 @@ function Name({ route }) {
             <View style={styles.container}>
                 <TouchableOpacity
                     style={styles.backButton}
-                    onPress={() => navigation.navigate('Password', {userId : userId})}
+                    onPress={() => navigation.navigate('Emailverify')}
                 >
                     <Icon name="arrow-back" size={45} color="#BD7CFF" />
                 </TouchableOpacity>
