@@ -11,10 +11,11 @@ export const AuthProvider = ( {children} ) => {
     const [isDriver, setIsDriver] = useState(false);
     const [userID, setUserID] = useState(null);
     const [userToken, setUserToken] = useState(null);
-    const [email, setEmail] = useState('')
+    const [email, setEmail] = useState('');
     const [loginFailed, setLoginFailed] = useState(false);  
-    const [driverSignRedirect,setDriverSignRedirect] = useState(false)
-    const [completedRegistration, setCompletedRegistration] = useState(true);
+    const [loggedIn,setLoggedin] = useState(false);
+    const [driverSignRedirect,setDriverSignRedirect] = useState(false);
+    const [completedRegistration, setCompletedRegistration] = useState(false);
     const [driverID, setDriverID]  = useState(null);
     const [profilePicture, setProfilePicture] = useState(null);
 
@@ -55,6 +56,7 @@ export const AuthProvider = ( {children} ) => {
     const login = async (token,uid) => {     
                 await AsyncStorage.setItem("userToken", token);          
                 await AsyncStorage.setItem("UID",uid);  //Temporary until api calls changed
+                 setLoggedin(true);
                  setUserToken(token);
                  setUserID(uid);
     };
@@ -66,14 +68,13 @@ export const AuthProvider = ( {children} ) => {
         AsyncStorage.setItem("userPosition",pos);          
     }
     
-    const logout = (isDeleted) => {
-        if (!isDeleted) {
+    const logout = () => {
         Alert.alert("Logout", "Are you sure you want to logout?", [
             { text: "Cancel", onPress: () => { return; } },
         
             { text: "Confirm", onPress: () => {   
                 setUserToken(null)
-                AsyncStorage.removeItem("userToken")           
+                AsyncStorage.removeItem("userToken")
                     .then(() => {             
                         //'removed')   
                         setIsLoading(false);                        
@@ -83,52 +84,31 @@ export const AuthProvider = ( {children} ) => {
                         console.error("Error removing userToken from AsyncStorage: ", error);             
                     }); 
                 setTimeout(()=>{
-               // setIsLoading(true);   
-                setUserToken(null);  
-                setDriverID(null);
-                setUserID(null);
-                setIsDriver(false);
-                setLoginFailed(false);
-               
-            },200)
+                setLoggedin(false);
+                resetRegistrationComplete();
+            },20)
                                 
                 }
             }        
         ]);
-    }
-    else {
-        setUserToken(null)
-        AsyncStorage.removeItem("userToken")           
-            .then(() => {             
-                //'removed')   
-                setIsLoading(false);                        
-            })                       
-            .catch(error => {                  
-                setIsLoading(false);              
-                console.error("Error removing userToken from AsyncStorage: ", error);             
-            }); 
-        setTimeout(()=>{
-       // setIsLoading(true);   
-        setUserToken(null);  
-        setDriverID(null);
-        setUserID(null);
-        setIsDriver(false);
-        setLoginFailed(false);
-       
-    },200)  
-    }
+    
+   
     };
     
 
     const isLoggedIn = async() => {
         try {
-                     
-            let userToken = await AsyncStorage.getItem("userToken");       
+            let userToken = await AsyncStorage.getItem("userToken");     
+            let compRegistration = await AsyncStorage.getItem("registrationComplete");     
             console.log('token',userToken);
-            setUserToken(userToken);
-            setIsLoading(false);
-            return true;
-        
+            if (userToken) {
+                setLoggedin(true)
+                setUserToken(userToken);
+            }
+            if (compRegistration === 'true') {
+                setCompletedRegistration(true);
+            }
+           setIsLoading(false);
         }
         catch(e) {
             setIsLoading(false);
@@ -137,40 +117,17 @@ export const AuthProvider = ( {children} ) => {
     }; 
 
     const completeRegistration = async () => {
-    
-        setDriverSignRedirect(false)
+
         setCompletedRegistration(true);
-        await AsyncStorage.setItem("registrationComplete", "true");
+        await AsyncStorage.setItem("registrationComplete","true");
         return true;
     };
     
-    const isRegistrationComplete = async () => {
-        try {     
-            let asyncCompletedRegistration = await AsyncStorage.getItem("registrationComplete");
-            setCompletedRegistration(asyncCompletedRegistration === "true");
-        }
-        catch (e) {
-            //"Registration Complete ERROR: ",e.toString() );
-        }
-    };
 
-    const resetRegistrationComplete = async (driversign) => {
-      //  setIsLoading(false)
-        try {
-            if (driversign){
-                setDriverSignRedirect(driversign)
-            }        
-            setTimeout(() => {
+    const resetRegistrationComplete = async () => {
+                AsyncStorage.removeItem("registrationComplete");
                 setCompletedRegistration(false);
-                //"resetRegistrationComplete: ", completedRegistration)
-                AsyncStorage.setItem("registrationComplete", "false");
-                
-            },20);
-        }
-        catch (e) {
-            //"HERE2")
-            //"Registration Complete ERROR: ",e.toString() );
-        }
+
     };
 
   //  const response = await fetch(`${API_URL}/auth/getMyID`, getMyIDRequestOptions);
@@ -289,7 +246,7 @@ export const AuthProvider = ( {children} ) => {
             };
 
     useEffect(() => {
-        isLoggedIn();
+       isLoggedIn();
       //setIsLoading(false);
         if (userToken) {
            // isRegistrationComplete();
@@ -315,10 +272,12 @@ export const AuthProvider = ( {children} ) => {
                 getProfilePic,
                 saveProfilePic,
                 saveLoading,
+                isLoggedIn,
                 userID,
                 isDriver,
                 userToken,
                 email,
+                loggedIn,
                 isLoading,
                 loginFailed,
                 completedRegistration,

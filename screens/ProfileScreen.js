@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect,useContext } from 'react';
 import { Image, View, Text, TouchableOpacity, StyleSheet, Modal, TextInput, TouchableWithoutFeedback, Keyboard, FlatList, ScrollView } from "react-native";
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons'; 
@@ -6,10 +6,12 @@ import * as ImagePicker from 'expo-image-picker';
 import { heightPercentageToDP as hp, widthPercentageToDP as wp } from 'react-native-responsive-screen';
 import { localAddress } from '../constants';
 import * as Location from 'expo-location';
+import { AuthContext } from '../context/AuthContext';
 
 const API_URL = localAddress;
 
 function Profile({userId}) {
+    const {logout} = useContext(AuthContext);
     const navigation = useNavigation();
     const [modalVisible, setModalVisible] = useState(false);
     const [settingsModalVisible, setSettingsModalVisible] = useState(false);
@@ -828,7 +830,7 @@ function Profile({userId}) {
                                 <View style={styles.divider80} />
 
                                 {/* Log Out and Delete Account Buttons */}
-                                <TouchableOpacity style={styles.button1} onPress={() => navigation.navigate('Landing')}>
+                                <TouchableOpacity style={styles.button1} onPress={() => {logout()}}>
                                     <Icon name="log-out-outline" size={20} color="#fff" style={styles.icon} />
                                     <Text style={styles.buttonText}>Log Out</Text>
                                 </TouchableOpacity>

@@ -16,6 +16,7 @@ function Landing() {
     const navigation = useNavigation();
     const [modalVisible, setModalVisible] = useState(true);
     const { login, Oauth, completeRegistration, resetRegistrationComplete } = useContext(AuthContext);
+    const uri = Linking.createURL() 
 
     const [fontsLoaded] = Font.useFonts({
         'Quick Love': require('../assets/QuickLove-gxeqP.ttf'),
@@ -32,6 +33,8 @@ function Landing() {
 
     
 const googleOauth = async () => {
+    console.log('fart')
+    console.log(uri)
     //uri)
     const result = await WebBrowser.openAuthSessionAsync(
         `${BASE_URL}/auth/google/?redirect=` + uri, uri

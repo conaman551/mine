@@ -3,11 +3,15 @@ import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import AppNavigation from '../navigation/AppNavigation';
-import { useEffect } from 'react';
+import { useEffect,useContext } from 'react';
 import { AuthProvider } from '@/context/AuthContext';
 import 'react-native-reanimated';
 import Loading from "../components/Loading";
+import AppNavigator from '../navigation/AppNavigator';
+import { AuthContext } from '../context/AuthContext';
+import MainTabs from '../navigation/MainTabs';
+
+
 
 import { useColorScheme } from '@/components/useColorScheme';
 
@@ -29,6 +33,7 @@ export default function RootLayout() {
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
     ...FontAwesome.font,
   });
+  
 
   // Expo Router uses Error Boundaries to catch errors in the navigation tree.
   useEffect(() => {
@@ -49,13 +54,14 @@ export default function RootLayout() {
 }
 
 function RootLayoutNav() {
+
   const colorScheme = useColorScheme();
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
        <AuthProvider>
         <Loading/>
-      <AppNavigation/>
+        <AppNavigator/>
       </AuthProvider>
     </ThemeProvider>
   );

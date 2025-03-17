@@ -6,11 +6,19 @@ const userRouter = require('./routes/users')
 const filterRouter = require('./routes/filters')
 const imagesRouter = require('./routes/images')
 const authRouter = require('./routes/auth')
-
+const fs = require('fs');
+const https = require('https');
 const userSettingsRouter = require('./routes/userSettings')
+const port = 3000;
 
 //app.use(express.json());
 const chatsRouter = require('./routes/chats')
+
+// WebSocket Config
+const server = https.createServer({
+    key: fs.readFileSync('/etc/letsencrypt/live/trippr.org/privkey.pem'),
+    cert: fs.readFileSync('/etc/letsencrypt/live/trippr.org/fullchain.pem')
+  }, app);
 
 //deleteOldRecords();
 //setInterval(deleteOldRecords(), 60 * 1000);
@@ -32,5 +40,7 @@ app.use('/chats', chatsRouter)
 app.use('/images', imagesRouter)
 
 
-app.listen(3000)
+server.listen(port, () => {
+    console.log(`Server is running on https://localhost:${port}`);
+  });
 

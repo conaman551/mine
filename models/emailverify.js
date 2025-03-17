@@ -16,7 +16,7 @@ function Emailverify({ route }) {
     const [code, setCode] = useState(['', '', '', '', '', '']);
     const inputRefs = useRef([]);
     const invisibleInputRef = useRef(null);
-    const { saveLoading,login } = useContext(AuthContext); //change to getFirstName
+    const { saveLoading,login,completeRegistration } = useContext(AuthContext); //change to getFirstName
 
     const loadingAnimation = useRef(new Animated.Value(0)).current;
     const screenWidth = Dimensions.get('window').width;
@@ -92,17 +92,12 @@ function Emailverify({ route }) {
                     const resp = await response.json()
                     console.log(resp)
                     if (resp.message === 'correct') {
+                        if (resp.existingUser) { 
+                            completeRegistration();
+                           }
+                        login(resp.token,String(resp.UID));
                        //store user token and userid here
-                       login(resp.token,String(resp.UID))
-                       
-                       if (!resp.existingUser) { //Reversed for testing
-                        navigation.navigate('HomeTabs')
-                        saveLoading(false);
-                       }
-                       else {
-                        navigation.navigate('Name');
-                      //  navigation.navigate('Password', {userId : resp.uid}); //Removed password requirement for now
-                       }
+                       saveLoading(false);
                     }
                     else if (resp.message === 'wrong code') {
                          console.log('wrong code')
