@@ -4,11 +4,12 @@ import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { heightPercentageToDP as hp, widthPercentageToDP as wp } from 'react-native-responsive-screen';
 import { localAddress } from '../constants';
+import { AuthContext } from "../context/AuthContext";
 
 const API_URL = localAddress
 
-function Bio({ route }) {
-    const userId = route.params.userId;
+function Bio() {
+    const { saveLoading,userID } = useContext(AuthContext); //change to getFirstName
     const navigation = useNavigation();
     const [bio, setBio] = useState('');
     const dismissKeyboard = () => {
@@ -19,6 +20,7 @@ function Bio({ route }) {
     const screenWidth = Dimensions.get('window').width;
 
     useEffect(() => {
+        saveLoading(false);
         const startAnimation = () => {
             loadingAnimation.setValue(0);
             Animated.loop(
@@ -34,8 +36,9 @@ function Bio({ route }) {
     }, []);
     
     const handleSubmit = async () => {
+        saveLoading(true);
         const data = {
-            uid : userId,
+            uid : userID,
             bio : bio
         };
         console.log(bio) //To remove
@@ -48,14 +51,16 @@ function Bio({ route }) {
                 body: JSON.stringify(data),
             })
             if(response.ok){
-                navigation.navigate('Habit', {userId : userId});
+                navigation.navigate('Habit');
             }
             else{
                 console.log('Try again')
+                saveLoading(false);
             }
         }
         catch(error){
             console.log('Error', error);
+            saveLoading(false);
         }
     };
 
@@ -64,7 +69,7 @@ function Bio({ route }) {
             <View style={styles.container}>
                 <TouchableOpacity
                     style={styles.backButton}
-                    onPress={() => navigation.navigate('Userlocation', {userId : userId})} 
+                    onPress={() => navigation.navigate('Userlocation')} 
                 >
                     <Icon name="arrow-back" size={45} color="#BD7CFF" />
                 </TouchableOpacity>

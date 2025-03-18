@@ -12,11 +12,12 @@ function Gender({ route }) {
 
     const navigation = useNavigation();
     const [selectedGender, setSelectedGender] = useState(null);
-    const {userID} = useContext(AuthContext); //change to getFirstName
+    const {userID,saveLoading} = useContext(AuthContext); //change to getFirstName
     const loadingAnimation = useRef(new Animated.Value(0)).current;
     const screenWidth = Dimensions.get('window').width;
 
     useEffect(() => {
+        saveLoading(false)
         const startAnimation = () => {
             loadingAnimation.setValue(0);
             Animated.loop(
@@ -36,6 +37,7 @@ function Gender({ route }) {
     };
 
     const handleSubmit = async () => {
+        saveLoading(true)
         const data = { 
             uid : userID,
             gender: selectedGender 
@@ -55,10 +57,12 @@ function Gender({ route }) {
             }
             else{
                 console.log('Try again')
+                saveLoading(false);
             }
         }
         catch(error){
             console.log('Error', error);
+            saveLoading(false);
         }
     };
 

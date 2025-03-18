@@ -5,11 +5,12 @@ import * as Location from 'expo-location';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { heightPercentageToDP as hp, widthPercentageToDP as wp } from 'react-native-responsive-screen';
 import { localAddress } from '../constants';
+import { AuthContext } from "../context/AuthContext";
 
 const API_URL = localAddress
 
-function Userlocation({ route }) {
-    const userId = route.params.userId;
+function Userlocation({}) {
+    const { saveLoading,userID } = useContext(AuthContext); //change to getFirstName
     const navigation = useNavigation();
     const [location, setLocation] = useState(null);
     const [address, setAddress] = useState(null);
@@ -20,6 +21,7 @@ function Userlocation({ route }) {
     const screenWidth = Dimensions.get('window').width;
 
     useEffect(() => {
+        saveLoading(false)
         const startAnimation = () => {
             loadingAnimation.setValue(0);
             Animated.loop(
@@ -60,6 +62,7 @@ function Userlocation({ route }) {
                 setAddress(preciseAddress);
             }
         } catch (error) {
+            setIsFetching(false);
             Alert.alert('Location Error', 'Unable to fetch location. Please try again.');
         } finally {
             setIsFetching(false); 
@@ -67,8 +70,9 @@ function Userlocation({ route }) {
     };
 
     const handleSubmit = async () => {
+        saveLoading(true)
         const data = {
-            uid : userId,
+            uid : userID,
             latitude: location?.latitude,
             longitude: location?.longitude,
         };
@@ -83,14 +87,16 @@ function Userlocation({ route }) {
                 body: JSON.stringify(data),
             })
             if(response.ok){
-                navigation.navigate('Bio', {userId : userId});
+                navigation.navigate('Bio');
             }
             else{
                 console.log('Try again')
+                saveLoading(false)
             }
         }
         catch(error){
             console.log('Error', error);
+            saveLoading(false)
         }
     };
 
@@ -98,7 +104,7 @@ function Userlocation({ route }) {
         <View style={styles.container}>
             <TouchableOpacity
                 style={styles.backButton}
-                onPress={() => navigation.navigate('Photo', {userId : userId})} 
+                onPress={() => navigation.navigate('Photo')} 
             >
                 <Icon name="arrow-back" size={45} color="#BD7CFF" />
             </TouchableOpacity>

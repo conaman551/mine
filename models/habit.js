@@ -4,13 +4,13 @@ import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { heightPercentageToDP as hp, widthPercentageToDP as wp } from 'react-native-responsive-screen';
 import { localAddress } from '../constants';
-
+import { AuthContext } from "../context/AuthContext";
 const API_URL = localAddress
 
-function Habit({ route }) {
-    const userId = route.params.userId;
-    const navigation = useNavigation();
+function Habit() {
     
+    const navigation = useNavigation();
+    const { saveLoading,userID } = useContext(AuthContext); //change to getFirstName
     const [drinking, setDrinking] = useState('');
     const [smoking, setSmoking] = useState('');
 
@@ -37,8 +37,9 @@ function Habit({ route }) {
     };
     
     const handleSubmit = async () => {
+        saveLoading(true);
         const data = {
-            uid : userId,
+            uid : userID,
             drinking: drinking,
             smoking: smoking
         };
@@ -53,13 +54,16 @@ function Habit({ route }) {
                 body: JSON.stringify(data),
             })
             if(response.ok){
-                navigation.navigate('Confirm', {userId : userId});
+                navigation.navigate('Confirm');
+
             }
             else{
                 console.log('Try again')
+                saveLoading(false)
             }
         }
         catch(error){
+            saveLoading(false)
             console.log('Error', error);
         }
     };
@@ -69,7 +73,7 @@ function Habit({ route }) {
             <View style={styles.container}>
                 <TouchableOpacity
                     style={styles.backButton}
-                    onPress={() => navigation.navigate('Userlocation', {userId : userId})} 
+                    onPress={() => navigation.navigate('Userlocation')} 
                 >
                     <Icon name="arrow-back" size={45} color="#BD7CFF" />
                 </TouchableOpacity>

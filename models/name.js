@@ -8,7 +8,7 @@ import { AuthContext } from "../context/AuthContext";
 
 const API_URL = localAddress
 
-function Name({ route }) {
+function Name({ }) {
     
     const loadingAnimation = useRef(new Animated.Value(0)).current;
     const screenWidth = Dimensions.get('window').width;
@@ -53,6 +53,7 @@ function Name({ route }) {
     };
 
     const handleSubmit = async () => {
+        saveLoading(true)
         const name = {
             uid: userID,
             firstName : firstName,
@@ -90,10 +91,12 @@ function Name({ route }) {
             }
             else{
                 console.log('Try again')
+                saveLoading(false)
             }
         }
         catch(error){
             console.log('Error', error);
+            saveLoading(false)
         }
         
     };

@@ -1,5 +1,5 @@
 import React, { useState,useEffect,useContext } from 'react';
-import { Image, View, StyleSheet, Text, TouchableOpacity, Modal,Button } from "react-native";
+import { Image, View, StyleSheet, Text, TouchableOpacity, Modal,Button,Alert } from "react-native";
 import { useNavigation } from '@react-navigation/native';
 import { heightPercentageToDP as hp, widthPercentageToDP as wp } from 'react-native-responsive-screen';
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -110,9 +110,9 @@ const googleOauth = async () => {
                 </View>
             </Modal>
 
-            <TouchableOpacity style={styles.button2} onPress={() => { googleOauth() }}>
+            <TouchableOpacity style={styles.secondaryButton} onPress={() => { googleOauth() }}>
                     <Image style={{ width: 25, resizeMode: 'contain', marginHorizontal: 5, marginLeft: 30 }} source={require('../assets/google_g.png')} />
-                    <Text style={styles.button2Text}>Continue with Google</Text>
+                    <Text style={styles.buttonText}>Continue with Google</Text>
             </TouchableOpacity>
         
             <TouchableOpacity 
@@ -123,7 +123,13 @@ const googleOauth = async () => {
                 <Text style={styles.buttonText}>Use email address</Text>
             </TouchableOpacity>
             
-            <View style={styles.orContainer}>
+           
+        </View>
+    );
+}
+
+/**
+ *  <View style={styles.orContainer}>
                 <View style={styles.orLine} />
                 <Text style={styles.orText}>or</Text>
                 <View style={styles.orLine} />
@@ -135,15 +141,14 @@ const googleOauth = async () => {
                 <Icon name="person-outline" size={20} color="#fff" style={styles.icon} />
                 <Text style={styles.buttonText}>I already have an account</Text>
             </TouchableOpacity>
-        </View>
-    );
-}
+ */
+
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
         alignItems: 'center', 
-        paddingTop : hp(3),
+        paddingTop : hp(1),
         backgroundColor: '#FFFFFF',
     },
     logo: {

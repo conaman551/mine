@@ -6,11 +6,12 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import { heightPercentageToDP as hp, widthPercentageToDP as wp } from 'react-native-responsive-screen';
 import { localAddress } from '../constants';
 import * as ImageManipulator from 'expo-image-manipulator';
+import { AuthContext } from "../context/AuthContext";
 
 const API_URL = localAddress
 
-function Photo({ route }) {
-    const userId = route.params.userId;
+function Photo({}) {
+    const {userID,saveLoading} = useContext(AuthContext); //change to getFirstName
     const navigation = useNavigation();
     const [selectedCategory, setSelectedCategory] = useState([null, null, null, null]);
     const [selectedImages, setSelectedImages] = useState([null, null, null, null]);
@@ -22,6 +23,7 @@ function Photo({ route }) {
     const screenWidth = Dimensions.get('window').width;
 
     useEffect(() => {
+        saveLoading(false)
         const startAnimation = () => {
             loadingAnimation.setValue(0);
             Animated.loop(
@@ -61,6 +63,7 @@ function Photo({ route }) {
     };
 
     const handleImageUpload = async (index) => {
+       
         let result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ImagePicker.MediaTypeOptions.Images,
             allowsEditing: true,
@@ -69,6 +72,7 @@ function Photo({ route }) {
         });
         // console.log(result)
         if (!result.canceled && result.assets && result.assets.length > 0) {
+            saveLoading(true);
             const newImages = [...selectedImages];
             const manipResult = await ImageManipulator.manipulateAsync(result.assets[0].uri, [{ resize: { width: 200, height: 150 } }], { compress: 1, format: ImageManipulator.SaveFormat.JPEG } );
            let localUri = manipResult.uri;
@@ -82,7 +86,7 @@ function Photo({ route }) {
     let formData = new FormData();
     // Assume "photo" is the name of the form field the server expects
     formData.append('image', { uri: localUri, name: filename, type });
-    formData.append('uid', userId);
+    formData.append('uid', userID);
     formData.append('categoryName', selectedCategory[index]);
     ////JSON.stringify(localUri))
     try{
@@ -93,10 +97,11 @@ function Photo({ route }) {
             'content-type': 'multipart/form-data',
         },
     })
+    saveLoading(false)
     if (!response.ok) {
         console.log('Try again')
         return;
-       
+        
     }
     else {
         const res = await response.json()
@@ -108,6 +113,7 @@ function Photo({ route }) {
         }
             catch(error){
                 console.log('Error', error);
+                saveLoading(false)
             }
         }
     };
@@ -125,18 +131,21 @@ function Photo({ route }) {
     };
 
     const handleSubmit = async () => {
+        saveLoading(true)
         if (selectedCategory.some(category => category === null || category === undefined)) {
             console.log('Error: Some categories are missing'); //To change
+            saveLoading(false)
             // navigation.navigate('Userlocation', {userId : userId}); //To remove
             return; //To remove
         }
         const validImages = selectedImages.filter(image => image !== null && image !== undefined);
         if (validImages.length !== selectedImages.length) {
             console.log('Error: Some images are missing'); //To change
+            saveLoading(false)
             // navigation.navigate('Userlocation', {userId : userId}); //To remove
             return; //To remove
         }
-        navigation.navigate('Userlocation', {userId : userId});
+        navigation.navigate('Userlocation');
         // console.log(selectedCategory) //To remove
         // console.log(selectedImages.map(image => image.base64)) //To remove
     };
@@ -145,7 +154,7 @@ function Photo({ route }) {
         <View style={styles.container}>
             <TouchableOpacity
                 style={styles.backButton}
-                onPress={() => navigation.navigate('Preference', {userId : userId})} 
+                onPress={() => navigation.navigate('Preference')} 
             >
                 <Icon name="arrow-back" size={45} color="#BD7CFF" />
             </TouchableOpacity>

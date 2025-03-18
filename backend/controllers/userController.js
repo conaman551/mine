@@ -70,7 +70,7 @@ const submitGender = async (req, res) => {
     }
 	// Update database
     try {
-        const result = await db.client.query(
+        await db.client.query(
         `UPDATE "users"
         SET "Gender"=$1
         WHERE "UID"=$2`

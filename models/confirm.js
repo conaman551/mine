@@ -4,11 +4,12 @@ import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { heightPercentageToDP as hp, widthPercentageToDP as wp } from 'react-native-responsive-screen';
 import { localAddress } from '../constants';
+import { AuthContext } from "../context/AuthContext";
 
 const API_URL = localAddress;
 
 function Confirm({ route }) {
-    const userId = route.params.userId;
+     const { saveLoading,userID,completeRegistration } = useContext(AuthContext); //change to getFirstName
     const navigation = useNavigation();
     const loadingAnimation = useRef(new Animated.Value(0)).current;
     const screenWidth = Dimensions.get('window').width;
@@ -16,6 +17,7 @@ function Confirm({ route }) {
     const [userData, setUserData] = useState(null);
 
     useEffect(() => {
+        saveLoading(false);
         const startAnimation = () => {
             loadingAnimation.setValue(0);
             Animated.loop(
@@ -33,12 +35,13 @@ function Confirm({ route }) {
     useEffect(() => {
         const fetchUserData = async () => {
             try {
-                const response = await fetch(`${API_URL}/users/${userId}/get-user`, {
+                const response = await fetch(`${API_URL}/users/${userID}/get-user`, {
                     method: 'GET',
                 });
                 if (response.ok) {
                     const result = await response.json();
                     setUserData(result);
+                    console.log('user data',result)
                 } else {
                     console.log('Failed to fetch user data');
                 }
@@ -48,31 +51,12 @@ function Confirm({ route }) {
         };
     
         fetchUserData();
-    }, [userId]);
+    }, [userID]);
     
 
     const handleSubmit = async () => {
-        const data = {
-            uid : userId,
-        };
-        try{
-            const responseValid = await fetch(`${API_URL}/users/submit-user`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(data),
-            })
-            if (responseValid) {
-                navigation.navigate('HomeTabs', {userIdLogin : userId});
-            }
-            else{
-                console.log('Try again')
-            }
-        }
-        catch(error){
-            console.log('Error', error);
-        }
+        saveLoading(true);
+        completeRegistration();
     };
 
     
@@ -83,7 +67,7 @@ function Confirm({ route }) {
         <View style={styles.container}>
             <TouchableOpacity
                 style={styles.backButton}
-                onPress={() => navigation.navigate('Habit', {userId : userId})}
+                onPress={() => navigation.navigate('Habit')}
             >
                 <Icon name="arrow-back" size={45} color="#BD7CFF" />
             </TouchableOpacity>
