@@ -11,46 +11,16 @@ export const AuthProvider = ( {children} ) => {
     const [isDriver, setIsDriver] = useState(false);
     const [userID, setUserID] = useState(null);
     const [userToken, setUserToken] = useState(null);
-    const [email, setEmail] = useState('');
-    const [loginFailed, setLoginFailed] = useState(false);  
+    const [regScreen,setRegScreen] = useState(0);
+   // const [email, setEmail] = useState('');
     const [loggedIn,setLoggedin] = useState(false);
-    const [driverSignRedirect,setDriverSignRedirect] = useState(false);
     const [completedRegistration, setCompletedRegistration] = useState(false);
     const [driverID, setDriverID]  = useState(null);
     const [profilePicture, setProfilePicture] = useState(null);
 
-
-    const getEmail = async () => {
-        try {
-            const requestOptions = {
-                method: "GET",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": "Bearer " + userToken,
-                },
-            };
-            const response = await fetch(`${API_URL}/user/getEmail`, requestOptions);
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
-            const data = await response.json();
-            if (data.message) {
-                setEmail(data.message)
-              
-            }
-            else {
-                setEmail('')
-            }
-        }
-        catch (error) {
-           console.log(error)
-        }
-    }
-
     const Oauth = async(token) => {
         await AsyncStorage.setItem("userToken", token);          
         setUserToken(token);
-        
     }
     
     const login = async (token,uid) => {     
@@ -94,12 +64,20 @@ export const AuthProvider = ( {children} ) => {
     
    
     };
-    
+    const saveRegScreen = async(screen) => {
+        AsyncStorage.setItem("regScreen",String(screen))
+        const num = Number(screen)
+        setRegScreen(num)
+    }
 
     const isLoggedIn = async() => {
         try {
             let userToken = await AsyncStorage.getItem("userToken");     
-            let compRegistration = await AsyncStorage.getItem("registrationComplete");     
+            let compRegistration = await AsyncStorage.getItem("registrationComplete");  
+            let regscreen = await AsyncStorage.getItem("regScreen");
+            if (regscreen) {
+                saveRegScreen(regscreen);
+            }
             console.log('token',userToken);
             if (userToken) {
                 setLoggedin(true)
@@ -125,9 +103,10 @@ export const AuthProvider = ( {children} ) => {
     
 
     const resetRegistrationComplete = async () => {
+               AsyncStorage.removeItem("regScreen");
                 AsyncStorage.removeItem("registrationComplete");
                 setCompletedRegistration(false);
-
+                setRegScreen(0);
     };
 
   //  const response = await fetch(`${API_URL}/auth/getMyID`, getMyIDRequestOptions);
@@ -272,18 +251,18 @@ export const AuthProvider = ( {children} ) => {
                 getProfilePic,
                 saveProfilePic,
                 saveLoading,
+                saveRegScreen,
                 isLoggedIn,
                 userID,
                 isDriver,
                 userToken,
-                email,
+             //   email,
                 loggedIn,
                 isLoading,
-                loginFailed,
+                regScreen,
                 completedRegistration,
                 driverID,
-                profilePicture,
-                driverSignRedirect
+                profilePicture
                 
             }}
         >

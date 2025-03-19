@@ -12,7 +12,7 @@ function Gender({ route }) {
 
     const navigation = useNavigation();
     const [selectedGender, setSelectedGender] = useState(null);
-    const {userID,saveLoading} = useContext(AuthContext); //change to getFirstName
+    const {userID,saveLoading,saveRegScreen} = useContext(AuthContext); //change to getFirstName
     const loadingAnimation = useRef(new Animated.Value(0)).current;
     const screenWidth = Dimensions.get('window').width;
 
@@ -53,6 +53,7 @@ function Gender({ route }) {
                 body: JSON.stringify(data),
             })
             if(response.ok){
+                saveRegScreen(2)
                 navigation.navigate('Preference');
             }
             else{

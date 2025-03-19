@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Image, View, StyleSheet, Text, TouchableOpacity, Modal, ScrollView, TouchableWithoutFeedback, Animated, Dimensions  } from "react-native";
+import React, { useState, useEffect, useRef,useContext } from 'react';
+import { Image, View, StyleSheet, Text, TouchableOpacity, Modal, ScrollView, TouchableWithoutFeedback, Animated, Dimensions,Alert  } from "react-native";
 import { useNavigation } from '@react-navigation/native';
 import * as ImagePicker from 'expo-image-picker';
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -11,7 +11,7 @@ import { AuthContext } from "../context/AuthContext";
 const API_URL = localAddress
 
 function Photo({}) {
-    const {userID,saveLoading} = useContext(AuthContext); //change to getFirstName
+    const {userID,saveLoading,saveRegScreen} = useContext(AuthContext); //change to getFirstName
     const navigation = useNavigation();
     const [selectedCategory, setSelectedCategory] = useState([null, null, null, null]);
     const [selectedImages, setSelectedImages] = useState([null, null, null, null]);
@@ -63,6 +63,7 @@ function Photo({}) {
     };
 
     const handleImageUpload = async (index) => {
+        console.log('index',index)
        
         let result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -132,19 +133,25 @@ function Photo({}) {
 
     const handleSubmit = async () => {
         saveLoading(true)
-        if (selectedCategory.some(category => category === null || category === undefined)) {
-            console.log('Error: Some categories are missing'); //To change
-            saveLoading(false)
-            // navigation.navigate('Userlocation', {userId : userId}); //To remove
-            return; //To remove
-        }
         const validImages = selectedImages.filter(image => image !== null && image !== undefined);
-        if (validImages.length !== selectedImages.length) {
+        const validCats = selectedCategory.filter(category => category !== null && category !== undefined);
+       // console.log(validCats,validImages.length)
+        if (validCats.length !== validImages.length || validCats.length === 0) {
+            console.log('Error: Some categories are missing'); //To change
+            Alert.alert("Some categories are missing","Make sure all photos have categories");
+            saveLoading(false)
+            // selectedCategory.some(category => category === null || category === undefined)
+            return; //To remove
+        }
+       
+        if (validImages.length < 3) {
             console.log('Error: Some images are missing'); //To change
+            Alert.alert("Add more photos","Make sure you have at least 3 photos");
             saveLoading(false)
             // navigation.navigate('Userlocation', {userId : userId}); //To remove
             return; //To remove
         }
+        saveRegScreen(4)
         navigation.navigate('Userlocation');
         // console.log(selectedCategory) //To remove
         // console.log(selectedImages.map(image => image.base64)) //To remove

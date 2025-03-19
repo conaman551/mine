@@ -183,7 +183,9 @@ authRouter.post('/emailVerify', async(req,res) => {
   let UID;
   const user = await getUserByEmail(email);
   if (user) {
-    existingUser = true;
+    if (user.Valid) {
+      existingUser = true;
+    }
     UID = user.UID;
   }
   else {

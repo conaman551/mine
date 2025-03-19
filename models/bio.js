@@ -9,7 +9,7 @@ import { AuthContext } from "../context/AuthContext";
 const API_URL = localAddress
 
 function Bio() {
-    const { saveLoading,userID } = useContext(AuthContext); //change to getFirstName
+    const { saveLoading,userID,saveRegScreen } = useContext(AuthContext); //change to getFirstName
     const navigation = useNavigation();
     const [bio, setBio] = useState('');
     const dismissKeyboard = () => {
@@ -51,6 +51,7 @@ function Bio() {
                 body: JSON.stringify(data),
             })
             if(response.ok){
+                saveRegScreen(6);
                 navigation.navigate('Habit');
             }
             else{

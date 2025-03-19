@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef,useContext } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Alert, Image, Animated, Dimensions  } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import * as Location from 'expo-location';
@@ -10,7 +10,7 @@ import { AuthContext } from "../context/AuthContext";
 const API_URL = localAddress
 
 function Userlocation({}) {
-    const { saveLoading,userID } = useContext(AuthContext); //change to getFirstName
+    const { saveLoading,userID,saveRegScreen } = useContext(AuthContext); //change to getFirstName
     const navigation = useNavigation();
     const [location, setLocation] = useState(null);
     const [address, setAddress] = useState(null);
@@ -87,6 +87,7 @@ function Userlocation({}) {
                 body: JSON.stringify(data),
             })
             if(response.ok){
+                saveRegScreen(5);
                 navigation.navigate('Bio');
             }
             else{

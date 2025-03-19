@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef,useContext } from 'react';
 import { Image, View, Text, TouchableOpacity, StyleSheet, Animated, Dimensions  } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -55,8 +55,34 @@ function Confirm({ route }) {
     
 
     const handleSubmit = async () => {
+
         saveLoading(true);
-        completeRegistration();
+
+        const data = {
+            uid : userID,
+        };
+        try{
+            const responseValid = await fetch(`${API_URL}/users/submit-user`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            })
+            if (responseValid) {
+                completeRegistration();
+                
+            }
+            else{
+                console.log('Try again')
+                saveLoading(false);
+            }
+        }
+        catch(error){
+            console.log('Error', error);
+            saveLoading(false);
+        }
+     
     };
 
     

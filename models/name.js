@@ -13,7 +13,7 @@ function Name({ }) {
     const loadingAnimation = useRef(new Animated.Value(0)).current;
     const screenWidth = Dimensions.get('window').width;
     const navigation = useNavigation();
-     const { saveLoading,userID } = useContext(AuthContext); //change to getFirstName
+     const { saveLoading,userID,logout,saveRegScreen } = useContext(AuthContext); //change to getFirstName
 
     useEffect(() => {
         saveLoading(false);
@@ -87,6 +87,7 @@ function Name({ }) {
                 body: JSON.stringify(dob)
             })
             if(response1.ok && response2.ok){
+                saveRegScreen(1)
                 navigation.navigate('Gender');//need change to num verify
             }
             else{
@@ -106,7 +107,7 @@ function Name({ }) {
             <View style={styles.container}>
                 <TouchableOpacity
                     style={styles.backButton}
-                    onPress={() => navigation.navigate('Emailverify')}
+                    onPress={() => logout()}
                 >
                     <Icon name="arrow-back" size={45} color="#BD7CFF" />
                 </TouchableOpacity>

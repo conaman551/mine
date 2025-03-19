@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef,useContext } from 'react';
 import { Image, View, Text, TouchableOpacity, StyleSheet, TouchableWithoutFeedback, Keyboard, Animated, Dimensions  } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -10,7 +10,7 @@ const API_URL = localAddress
 function Habit() {
     
     const navigation = useNavigation();
-    const { saveLoading,userID } = useContext(AuthContext); //change to getFirstName
+    const { saveLoading,userID,saveRegScreen } = useContext(AuthContext); //change to getFirstName
     const [drinking, setDrinking] = useState('');
     const [smoking, setSmoking] = useState('');
 
@@ -54,8 +54,8 @@ function Habit() {
                 body: JSON.stringify(data),
             })
             if(response.ok){
+                saveRegScreen(7)
                 navigation.navigate('Confirm');
-
             }
             else{
                 console.log('Try again')

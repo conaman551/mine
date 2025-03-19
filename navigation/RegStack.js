@@ -2,7 +2,7 @@
 import React,{useContext} from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { screens } from './screenImports';
-//import { AuthContext } from '../context/AuthContext';
+import { AuthContext } from '../context/AuthContext';
 
 
 const Stack = createNativeStackNavigator();
@@ -10,10 +10,11 @@ const Stack = createNativeStackNavigator();
 
 
 const RegStack = () => {
-  //const { completedRegistration} = useContext(AuthContext);
+  const {regScreen} = useContext(AuthContext);
+  const screenarr = ['Name','Gender','Preference','Photo','Userlocation','Bio','Habit','Confirm'] //0-7
   return (
   <Stack.Navigator
-    initialRouteName={"Name"}
+    initialRouteName={screenarr[regScreen]}
     screenOptions={{ 
       animation: 'fade',
       transitionDuration: 200,

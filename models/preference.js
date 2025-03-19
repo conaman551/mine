@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef,useContext } from 'react';
 import { Image, View, StyleSheet, Text, TouchableOpacity, Animated, Dimensions  } from "react-native";
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -9,7 +9,7 @@ import { AuthContext } from "../context/AuthContext";
 const API_URL = localAddress
 
 function Preference({ }) {
-    const {userID,saveLoading} = useContext(AuthContext); //change to getFirstName
+    const {userID,saveLoading,saveRegScreen} = useContext(AuthContext); //change to getFirstName
     const navigation = useNavigation();
     const [selectedPreference, setSelectedPreference] = useState(null);
 
@@ -52,6 +52,7 @@ function Preference({ }) {
                 body: JSON.stringify(data),
             })
             if(response.ok){
+                saveRegScreen(3);
                 navigation.navigate('Photo');
             }
             else{
