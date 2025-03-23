@@ -12,7 +12,7 @@ function Gender({ route }) {
 
     const navigation = useNavigation();
     const [selectedGender, setSelectedGender] = useState(null);
-    const {userID,saveLoading,saveRegScreen} = useContext(AuthContext); //change to getFirstName
+    const {userToken,saveLoading,saveRegScreen} = useContext(AuthContext); //change to getFirstName
     const loadingAnimation = useRef(new Animated.Value(0)).current;
     const screenWidth = Dimensions.get('window').width;
 
@@ -39,7 +39,6 @@ function Gender({ route }) {
     const handleSubmit = async () => {
         saveLoading(true)
         const data = { 
-            uid : userID,
             gender: selectedGender 
         };
         console.log(selectedGender); // For testing purposes, remove in production
@@ -48,11 +47,14 @@ function Gender({ route }) {
             const response = await fetch(`${API_URL}/users/submit-gender`, {
                 method: 'PUT',
                 headers: {
-                    'Content-Type': 'application/json',
+                    "Content-Type": "application/json",
+                    "Authorization": "Bearer " + userToken
                 },
                 body: JSON.stringify(data),
             })
             if(response.ok){
+           //     const res = await response.json()
+            //  console.log('gender res',res.message)
                 saveRegScreen(2)
                 navigation.navigate('Preference');
             }

@@ -13,11 +13,12 @@ function Habit() {
     const { saveLoading,userID,saveRegScreen } = useContext(AuthContext); //change to getFirstName
     const [drinking, setDrinking] = useState('');
     const [smoking, setSmoking] = useState('');
-
+    
     const loadingAnimation = useRef(new Animated.Value(0)).current;
     const screenWidth = Dimensions.get('window').width;
 
     useEffect(() => {
+        saveLoading(false);
         const startAnimation = () => {
             loadingAnimation.setValue(0);
             Animated.loop(

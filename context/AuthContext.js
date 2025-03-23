@@ -56,6 +56,7 @@ export const AuthProvider = ( {children} ) => {
                 setTimeout(()=>{
                 setLoggedin(false);
                 resetRegistrationComplete();
+            
             },20)
                                 
                 }
@@ -77,6 +78,9 @@ export const AuthProvider = ( {children} ) => {
             let regscreen = await AsyncStorage.getItem("regScreen");
             if (regscreen) {
                 saveRegScreen(regscreen);
+            }
+            else {
+                saveRegScreen(0)
             }
             console.log('token',userToken);
             if (userToken) {

@@ -1,7 +1,7 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-
-
+const { queryDatabase } = require('../repository/db');
+const { getUserByEmail } = require('../repository/userRepo');
 const db = require('../database_connector/databaseConnection');
 const API_KEY = 'YOUR_GOOGLE_MAPS_API_KEY'; // Ensure your API key is set
 
@@ -12,6 +12,7 @@ const API_KEY = 'YOUR_GOOGLE_MAPS_API_KEY'; // Ensure your API key is set
 
 
 const crypto = require('crypto');
+
 
 const generateVerificationCode = () => {
     // Generate a random 6-digit code
@@ -63,20 +64,24 @@ const login = async (req, res) => {
 
 // Function for submitting gender
 const submitGender = async (req, res) => {
-    const { uid, gender } = req.body;
+    const { gender } = req.body;
+    const user = await getUserByEmail(req.user.email);
+    if (!user) {
+        return res.status(400).json({ error: 'User not exist' });
+    }
 
     if (!gender) {
         return res.status(400).json({ error: 'Gender is required' });
     }
 	// Update database
     try {
-        await db.client.query(
+        const resp = await queryDatabase(
         `UPDATE "users"
         SET "Gender"=$1
-        WHERE "UID"=$2`
-            , [gender, uid])
+        WHERE "email"=$2 RETURNING *`
+            , [gender, user.email])
         // Respond with success message
-        return res.json({ message: 'Gender successfully updated' });
+        return res.json({ message:resp[0]});
     } catch (error) {
         // Respond with error message
         return res.status(500).json({ message: 'Internal server error' });
@@ -87,7 +92,11 @@ const submitGender = async (req, res) => {
 
 // Function for submitting firstName, surname
 const submitName = async (req, res) => {
-    const { uid, firstName, surname } = req.body;
+    const { firstName, surname } = req.body;
+    const user = await getUserByEmail(req.user.email);
+    if (!user) {
+        return res.status(400).json({ error: 'User not exist' });
+    }
 
     if (!firstName || !surname) {
         return res.status(400).json({ error: 'All fields are required' });
@@ -95,13 +104,14 @@ const submitName = async (req, res) => {
 
     try {
         // Update database
-        const result = await db.client.query(
+       const resp = await queryDatabase(
         `UPDATE "users"
-        SET "First_name"=$1, "Last_name"=$2
-        WHERE "UID"=$3`
-        , [firstName, surname, uid])
+        SET "First_name" = $1, "Last_name" = $2
+        WHERE "email" = $3
+        RETURNING *;`
+        , [firstName, surname, user.email])
         // Respond with success message
-        return res.json({ message: 'User details successfully updated' });
+        return res.json({ message:resp[0]});
     } catch (error) {
         // Respond with error message
         return res.status(500).json({ message: 'Internal server error' });
@@ -135,23 +145,26 @@ const submitPassword = async (req, res) => {
 
 // Logic  for submitting dob
 const submitDob = async (req, res) => {
-    const { uid, day, month, year } = req.body;
-
+    const { day, month, year } = req.body;
+    const user = await getUserByEmail(req.user.email);
+    if (!user) {
+        return res.status(400).json({ error: 'User not exist' });
+    }
     if (!day || !month || !year) {
         return res.status(400).json({ error: 'All fields are required' });
     }
 
-    const dob = new Date(year, month, day).toISOString().slice(0, 19).replace('T', ' ');
+    const dob = new Date(year, month - 1, day).toISOString().slice(0, 19).replace('T', ' ');
     try {
         // Update database
-        const result = await db.client.query(
+        const resp = await queryDatabase(
         `UPDATE "users"
         SET "DOB"=$1
-        WHERE "UID"=$2`
-            , [dob, uid])
+        WHERE "email"=$2 RETURNING *;`
+            , [dob,user.email])
 
         // Respond with success message
-        return res.json({ message: 'User details successfully updated' });
+        return res.json({message:resp[0]});
     } catch (error) {
         // Respond with error message
         return res.status(500).json({ message: 'Internal server error' });
@@ -162,7 +175,11 @@ const submitDob = async (req, res) => {
 
 // Function for submitting preference
 const submitPreference = async (req, res) => {
-    const { uid, preference } = req.body;
+    const { preference } = req.body;
+    const user = await getUserByEmail(req.user.email);
+    if (!user) {
+        return res.status(400).json({ error: 'User not exist' });
+    }
 
     if (!preference) {
         return res.status(400).json({ error: 'Preference is required' });
@@ -170,18 +187,44 @@ const submitPreference = async (req, res) => {
 
     try {
         // Update database
-        const result = await db.client.query(
+        const resp = await queryDatabase(
         `UPDATE "users"
         SET "Gender_pref"=$1
-        WHERE "UID"=$2`
-            , [preference, uid])
+        WHERE "email"=$2 RETURNING *`
+            , [preference, user.email])
 
         // Respond with success message
-        return res.json({ message: 'Preference successfully updated' });
+        return res.json({ message:resp[0]});
     } catch (error) {
         // Respond with error message
         return res.status(500).json({ message: 'Internal server error' });
     }
+};
+
+// Function for submitting preference
+const submitCats = async (req, res) => {
+    const { cats } = req.body;
+    const user = await getUserByEmail(req.user.email);
+    if (!user) {
+        return res.status(400).json({ error: 'User not exist' });
+    }
+
+    if (!cats || cats.length !== 4) {
+        console.log('bad cats')
+        return res.status(400).json({ error: 'Bad cats' });
+    }
+    let count = 1;
+    for (let cat of cats) {
+        const string_cat_name = 'Category_'+count+'_id';
+        await queryDatabase(
+            `UPDATE "users"
+            SET "${string_cat_name}"=$1
+            WHERE "email"=$2
+            RETURNING *`, [cat, user.email]
+          );
+        count++;
+    }
+    return res.json({ message: 'Cats successfully updated' });
 };
 
 
@@ -189,6 +232,8 @@ const submitPreference = async (req, res) => {
 // Function for submitting address
 const submitAddress = async (req, res) => {
     const { uid, latitude, longitude } = req.body;
+    const positionString = `(${latitude}, ${longitude})`;
+    console.log('position str',positionString);
 
     if (!latitude || !longitude) {
         return res.status(400).json({ error: 'Location is required' });
@@ -196,11 +241,11 @@ const submitAddress = async (req, res) => {
 
     try {
         // Update database
-        const result = await db.client.query(
+       await db.client.query(
         `UPDATE "users"
-        SET "Latitude"=$1, "Longitude"=$2
-        WHERE "UID"=$3`
-            , [latitude, longitude, uid])
+        SET "position"=$1
+        WHERE "UID"=$2`
+            ,[positionString,uid])
 
         // Respond with success message
         return res.json({ message: 'Address successfully updated' });
@@ -291,7 +336,7 @@ const submitBio = async (req, res) => {
 
     try {
         // Update database
-        const result = await db.client.query(
+        await db.client.query(
         `UPDATE "users"
         SET "Bio"=$1
         WHERE "UID"=$2`
@@ -317,8 +362,13 @@ const submitPreferences = async (req, res) => {
 
     try {
         // Update the temporary user preferences
-        console.log("tags not implemented yet")
-
+    //    console.log("tags not implemented yet")
+        await db.client.query(
+            `UPDATE "users"
+            SET "Smoking_tag"=$1, "Drinking_tag"=$2
+            WHERE "UID"=$3`
+                , [smoking, drinking, uid])
+          
         // Respond with a success message
         return res.json({ message: 'Preferences successfully updated' });
     } catch (error) {
@@ -353,14 +403,16 @@ const submitUser = async (req, res) => {
 }
 
 const sendVariables = async (req,res) => {
-    const { uid, ___ } = req.params;
+    const email = req.user.email;
+    console.log('email',email)
     try {
         const result = await db.client.query(
             `SELECT *
             FROM "users"
-            WHERE "UID"=$1`,
-            [uid]
+            WHERE "email"=$1`,
+            [email]
         )
+        console.log('res',result)
         // Respond with a success message
         return res.json(result.rows[0]);
         
@@ -419,6 +471,7 @@ module.exports = {
     submitBio,
     submitPreferences,
     submitUser,
+    submitCats,
     sendVariables,
     sendEmail,
 	deleteUser,

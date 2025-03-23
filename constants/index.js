@@ -16,7 +16,7 @@ import {
   //export const localAddress = 'http://172.23.93.76:3000';
   //export const localAddress = 'http://172.23.92.72:3000';
   export const localAddress = 'https://trippr.org:3000';
-  //export const localAddress = 'http://192.168.1.27:3002';
+  //export const localAddress = 'http://192.168.1.27:3000';
   
   export const userData = [
     {

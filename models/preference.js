@@ -9,7 +9,7 @@ import { AuthContext } from "../context/AuthContext";
 const API_URL = localAddress
 
 function Preference({ }) {
-    const {userID,saveLoading,saveRegScreen} = useContext(AuthContext); //change to getFirstName
+    const {userToken,saveLoading,saveRegScreen} = useContext(AuthContext); //change to getFirstName
     const navigation = useNavigation();
     const [selectedPreference, setSelectedPreference] = useState(null);
 
@@ -39,7 +39,6 @@ function Preference({ }) {
     const handleSubmit = async () => {
         saveLoading(true);
         const data = { 
-            uid : userID,
             preference: selectedPreference 
         };
         console.log(selectedPreference) //To remove
@@ -47,11 +46,14 @@ function Preference({ }) {
             const response = await fetch(`${API_URL}/users/submit-preference`, {
                 method: 'PUT',
                 headers: {
-                    'Content-Type': 'application/json',
+                    "Content-Type": "application/json",
+                    "Authorization": "Bearer " + userToken
                 },
                 body: JSON.stringify(data),
             })
             if(response.ok){
+                const res = await response.json()
+                console.log('pref res',res.message)
                 saveRegScreen(3);
                 navigation.navigate('Photo');
             }

@@ -9,7 +9,7 @@ import { AuthContext } from "../context/AuthContext";
 const API_URL = localAddress;
 
 function Confirm({ route }) {
-     const { saveLoading,userID,completeRegistration } = useContext(AuthContext); //change to getFirstName
+     const { saveLoading,userToken,userID,completeRegistration } = useContext(AuthContext); //change to getFirstName
     const navigation = useNavigation();
     const loadingAnimation = useRef(new Animated.Value(0)).current;
     const screenWidth = Dimensions.get('window').width;
@@ -34,10 +34,17 @@ function Confirm({ route }) {
 
     useEffect(() => {
         const fetchUserData = async () => {
+          console.log('ass',userToken)
             try {
-                const response = await fetch(`${API_URL}/users/${userID}/get-user`, {
-                    method: 'GET',
-                });
+                const requestOptions = {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": "Bearer " + userToken,
+                    },
+                };
+               
+                const response = await fetch(`${API_URL}/users/get-user`, requestOptions);
                 if (response.ok) {
                     const result = await response.json();
                     setUserData(result);
@@ -51,7 +58,7 @@ function Confirm({ route }) {
         };
     
         fetchUserData();
-    }, [userID]);
+    }, [userToken]);
     
 
     const handleSubmit = async () => {

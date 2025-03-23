@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef,useContext } from 'react';
-import { Image, View, StyleSheet, Text, TextInput, TouchableWithoutFeedback, Keyboard, TouchableOpacity, FlatList, Animated, Dimensions  } from "react-native";
+import { Image, View, StyleSheet, Text, TextInput, TouchableWithoutFeedback, Keyboard,Alert, TouchableOpacity, FlatList, Animated, Dimensions  } from "react-native";
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { heightPercentageToDP as hp, widthPercentageToDP as wp } from 'react-native-responsive-screen';
@@ -13,7 +13,7 @@ function Name({ }) {
     const loadingAnimation = useRef(new Animated.Value(0)).current;
     const screenWidth = Dimensions.get('window').width;
     const navigation = useNavigation();
-     const { saveLoading,userID,logout,saveRegScreen } = useContext(AuthContext); //change to getFirstName
+     const { saveLoading,userToken,logout,saveRegScreen } = useContext(AuthContext); //change to getFirstName
 
     useEffect(() => {
         saveLoading(false);
@@ -55,14 +55,12 @@ function Name({ }) {
     const handleSubmit = async () => {
         saveLoading(true)
         const name = {
-            uid: userID,
             firstName : firstName,
             surname : surname,
         }
         console.log(selectedMonth);
         const monthIndex = months.indexOf(selectedMonth) + 1;
         const dob = {
-            uid: userID,
             day : day,
             month: monthIndex,
             year: year,
@@ -75,17 +73,22 @@ function Name({ }) {
             const response1 = await fetch(`${API_URL}/users/submit-name`, {
                 method: 'PUT',
                 headers: {
-                    'Content-Type': 'application/json',
+                    "Content-Type": "application/json",
+                    "Authorization": "Bearer " + userToken,
                 },
                 body: JSON.stringify(name)
             })
+           
             const response2 = await fetch(`${API_URL}/users/submit-dob`, {
                 method: 'PUT',
                 headers: {
-                    'Content-Type': 'application/json',
+                    "Content-Type": "application/json",
+                    "Authorization": "Bearer " + userToken,
                 },
                 body: JSON.stringify(dob)
             })
+          //  const res = await response2.json()
+           // console.log('name res',res.message)
             if(response1.ok && response2.ok){
                 saveRegScreen(1)
                 navigation.navigate('Gender');//need change to num verify
@@ -197,7 +200,23 @@ function Name({ }) {
                 </View>
                 <TouchableOpacity 
                 style={styles.nextButton}
-                onPress={()=>{handleSubmit()}}>
+                onPress={()=>{
+                    const dayy = day.replace(/[^0-9]/g, '');
+                    const yearr = year.replace(/[^0-9]/g, '');
+                    // Remove any non-numeric characters
+                    // Only update if the value is empty or between 1 and 31
+                    if ((parseInt(dayy) >= 1 && parseInt(dayy) <= 31)) {
+                        if ((parseInt(yearr) >= 1900 && parseInt(yearr) <= 2020)) {
+                            handleSubmit()
+                        }
+                        else {
+                            Alert.alert("Invalid year", "Please enter a year between 1900 and 2020");
+                        }
+                    }
+                    else {
+                             Alert.alert("Invalid day", "Please enter a day between 1 and 31");
+                    }
+                   }}>
                     <Text style={styles.nextButtonText}>Next</Text>
                 </TouchableOpacity>
 

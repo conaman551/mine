@@ -11,7 +11,7 @@ import { AuthContext } from "../context/AuthContext";
 const API_URL = localAddress
 
 function Photo({}) {
-    const {userID,saveLoading,saveRegScreen} = useContext(AuthContext); //change to getFirstName
+    const {userToken,saveLoading,saveRegScreen} = useContext(AuthContext); //change to getFirstName
     const navigation = useNavigation();
     const [selectedCategory, setSelectedCategory] = useState([null, null, null, null]);
     const [selectedImages, setSelectedImages] = useState([null, null, null, null]);
@@ -54,6 +54,7 @@ function Photo({}) {
         const newCategories = [...selectedCategory];
         newCategories[activeSquare] = category;
         setSelectedCategory(newCategories);
+        console.log('assssssss',newCategories)
         setModalVisible2(false);
     };
 
@@ -62,8 +63,40 @@ function Photo({}) {
         setModalVisible2(true);
     };
 
+    const submitCats = async() => {
+        const data = { 
+            cats:selectedCategory
+        };
+       
+        try{
+            const response = await fetch(`${API_URL}/users/submit-cats`, {
+                method: 'PUT',
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": "Bearer " + userToken
+                },
+                body: JSON.stringify(data),
+            })
+            if(response.ok){
+                const res = await response.json()
+                console.log('photo res',res.message)
+                saveRegScreen(4)
+                navigation.navigate('Userlocation');
+            }
+            else{
+                console.log('Try again')
+               saveLoading(false)
+            }
+        }
+        catch(error){
+            console.log('Error', error);
+            saveLoading(false)
+        }
+    }
+
     const handleImageUpload = async (index) => {
         console.log('index',index)
+        console.log(selectedCategory)
        
         let result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -87,7 +120,7 @@ function Photo({}) {
     let formData = new FormData();
     // Assume "photo" is the name of the form field the server expects
     formData.append('image', { uri: localUri, name: filename, type });
-    formData.append('uid', userID);
+   // formData.append('uid', userID);
     formData.append('categoryName', selectedCategory[index]);
     ////JSON.stringify(localUri))
     try{
@@ -96,6 +129,7 @@ function Photo({}) {
         body: formData,
         headers: {
             'content-type': 'multipart/form-data',
+            "Authorization": "Bearer " + userToken
         },
     })
     saveLoading(false)
@@ -151,10 +185,11 @@ function Photo({}) {
             // navigation.navigate('Userlocation', {userId : userId}); //To remove
             return; //To remove
         }
-        saveRegScreen(4)
-        navigation.navigate('Userlocation');
-        // console.log(selectedCategory) //To remove
-        // console.log(selectedImages.map(image => image.base64)) //To remove
+        submitCats()
+       // saveLoading(false)
+        
+        
+        
     };
 
     return (

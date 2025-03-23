@@ -43,7 +43,7 @@ export default function ChatDetailsScreen({ route }){
     
     const handleUnmatch = async () => {
         try {
-            const response = await fetch(`http://3.26.72.199:3000/chats/unmatch/${UID1}/${UID2}`, {
+            const response = await fetch(`https://trippr.org:3000/chats/unmatch/${UID1}/${UID2}`, {
                 method: 'DELETE',
             });
             

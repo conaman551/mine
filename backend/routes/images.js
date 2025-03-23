@@ -5,7 +5,9 @@ const fs = require('fs');
 const path = require('path');
 const imagesController = require('../controllers/imagesController');
 const userRepo = require('../repository/userRepo');
+const { passport } = require('../config/passport-config');
 const { queryDatabase } = require("../repository/db");
+
 
 // Set up storage configuration
 const storage = multer.diskStorage({
@@ -29,33 +31,35 @@ const upload = multer({
       fileSize: 10000000
   } });
 
-//router.get("/:uid", imagesController.getProfileByUID);
-//router.get("/:uid", imagesController.getCategoryByUID);
-router.put("/update_category/:cat_id/", upload.single('image'), async (req, res) => {
+router.put("/update_category/:cat_id/", upload.single('image'),passport.authenticate('jwt', { session: false }), async (req, res) => {
+
   if(!req.file){
     return  res.status(400).json({message:"Malformed Request", messageType:"JSONError"});
 }   
+const user = await userRepo.getUserByEmail(req.user.email);
+    if (!user) {
+        return res.status(400).json({ error: 'User not exist' });
+    }
+
 const filetypes = /jpeg|jpg|png|gif|tiff/;
 if (!filetypes.test(path.extname(req.file.originalname).toLowerCase()) && !/image/.test(req.file.mimetype)) {
 return res.status(415).json({message: "Incorrect Image type, please use format", messageType:"InputError"})
 }
 const { ___, cat_id } = req.params;
-const { uid, categoryName } = req.body;
+const { categoryName } = req.body;
 
 console.log('a')
-const user = await userRepo.getUserByUserId(uid);
-if (!user) {
-   console.log('not user exist')
-    return res.status(404).json({message:"User does not exist", messageType:"ValueError"});
-}
 const string_cat_id = 'Category_'+cat_id.toString()+'_image_url';
 const string_cat_name = 'Category_'+cat_id.toString()+'_id';
 console.log('user[string_cat_id]',user[string_cat_id])
+console.log(string_cat_id)
+console.log(string_cat_name)
 // Delete old image if it exists
 if (user[string_cat_id]) {
   try {
 const fileName = user[string_cat_id].split('/').pop();
 const oldImagePath = path.join(__dirname,'cat_images',fileName);
+console.log('oldimagepath',oldImagePath)
 if (fs.existsSync(oldImagePath)) {
   fs.unlinkSync(oldImagePath);
 }
@@ -65,12 +69,12 @@ catch {
 }
 } 
 
-  const imageUrl = `${req.protocol}://${req.get('host')}/images/cat_images/${req.file.filename}`;
+  const imageUrl = `https://trippr.org:3000/images/cat_images/${req.file.filename}`;
     await queryDatabase(
           `UPDATE "users"
           SET "${string_cat_id}"=$1, "${string_cat_name}"=$3
-          WHERE "UID"=$2
-          RETURNING *`, [imageUrl, uid, categoryName]
+          WHERE "email"=$2
+          RETURNING *`, [imageUrl, user.email, categoryName]
         );
 
   // Respond with the file URL
@@ -82,17 +86,6 @@ router.use('/cat_images', express.static(path.join(__dirname, 'cat_images')));
 
   // Upload endpoint
   router.put('/update_main', upload.single('image'), async (req, res) => {
-    const { data, filename, uid } = req.body;
-     if(!data || !filename || !uid){
-            return  res.status(400).json({message:"Malformed Request", messageType:"JSONError"});
-        }   
-    
-    console.log('a')
-    //Probably have to send up email from frontend
-    const user = await userRepo.getUserByUserId(uid)
-    if (!user) {
-        return res.status(404).json({message:"User does not exist", messageType:"ValueError"});
-    }
    
   });
   
