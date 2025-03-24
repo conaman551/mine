@@ -42,7 +42,7 @@ router.put('/submit-bio',  passport.authenticate('jwt', { session: false }),user
 router.put('/submit-preferences', passport.authenticate('jwt', { session: false }), userController.submitPreferences);
 router.put('/submit-user', passport.authenticate('jwt', { session: false }), userController.submitUser);
 
-router.get('/delete/:uid', userController.deleteUser);
+router.get('/delete-user',  passport.authenticate('jwt', { session: false }),userController.deleteUser);
 
 router.put('/submit-name', passport.authenticate('jwt', { session: false }), userController.submitName);
 

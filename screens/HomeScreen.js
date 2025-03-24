@@ -112,9 +112,15 @@ export default function HomeScreen({}) {
 
     // POST and DELETE request functions
     const postAction = async (user, action) => {
+        console.log('post action',action)
+        
         try {
-            const response = await fetch(`${localAddress}/users/${userID}/${action}/${user.UID}`, {
+            const response = await fetch(`${localAddress}/users/${action}-user`, {
                 method: 'POST',
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": "Bearer " + userToken,
+                }
             });
     
             if (!response.ok) {

@@ -1,5 +1,5 @@
 import { ActivityIndicator, View, Text, StyleSheet, Image, TouchableOpacity, FlatList } from 'react-native';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState,useContext } from 'react';
 import TopBar from '../template/TopBar';
 //import { chatData } from "../constants";
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
@@ -7,13 +7,13 @@ import {heightPercentageToDP as hp, widthPercentageToDP as wp} from 'react-nativ
 import { localAddress } from '../constants';
 import iceSpiceTemp from '../assets/icespicetemp.png'
 import MaybeBioScreen from './MaybeBioScreen';
+import { AuthContext } from "../context/AuthContext";
 
 export default function MaybeScreen2({userId}){
     const navigation = useNavigation();
     const MaybeLimit = 6;
-
+    const { saveLoading,userToken} = useContext(AuthContext); //change to getFirstName
     const [maybeData, setMaybeData] = useState([]);
-    const [loading, setLoading] = useState(true); // Loading state
     const [showProfile, setShowProfile] = useState(false);
     const [currentUser, setCurrentUser] = useState(null);
 
@@ -22,28 +22,22 @@ export default function MaybeScreen2({userId}){
       };
     
       const fetchMaybeData = () => {
-        fetch(`${localAddress}/users/${userId}/maybe-list/`)
+        fetch(`${localAddress}/users/get-maybes`, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + userToken,
+            },
+        })
             .then(response => response.json())
-            .then(data => {
-                const fetchUserDetails = data.map(maybeUser =>
-                    fetch(`${localAddress}/users/${maybeUser.UID}/`)
-                        .then(response => response.json())
-                        .catch(error => {
-                            console.error(`Error fetching details for user ${maybeUser.UID}:`, error);
-                            return null; // Handle fetch errors gracefully
-                        })
-                );
-
-                return Promise.all(fetchUserDetails);
-            })
             .then(fullUserData => {
                 const validUserData = fullUserData.filter(user => user !== null);
                 setMaybeData(validUserData); // Set maybe data with fetched users
-                setLoading(false); // Stop loading
+                saveLoading(false); // Stop loading
             })
             .catch(error => {
                 console.error('Error fetching maybe list:', error);
-                setLoading(false);
+                saveLoading(false);
             });
     };
 

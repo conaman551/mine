@@ -451,23 +451,81 @@ const sendEmail = async (req,res)  => {
     }
 }
 
+
+
 const deleteUser = async (req, res) => {
-	const { ____, uid } = req.params;
-	// Update database
-    try {
-        const result = await db.client.query(
-        `DELETE FROM "users"
-        WHERE "UID"=$1`
-            , [uid])
+	const user = await getUserByEmail(req.user.email);
+   if (!user) {
+       return res.status(400).json({ error: 'User not exist' });
+   }
+   function generateRandomString(length) {
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let result = '';
+    const charactersLength = characters.length;
+    for (let i = 0; i < length; i++) {
+      result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }
+    return result;
+  }
+   try {
+   let random = generateRandomString(7)
+   const imageUrl = `https://trippr.org:3000/images/cat_images/deleted.jpg`;
+   // let randomnumber = generateNumber()
+    let deleted = 'deleted'
+    const query = `UPDATE "users"
+      SET "email" = $2,
+      "Password" = $2,
+      "Phone_number" = $3,
+      "First_name" = $3,
+      "Last_name" = $3,
+      "Category_1_image_url" = $4,
+      "Category_2_image_url" = $4,
+      "Category_3_image_url" = $4,
+      "Category_4_image_url" = $4,
+      "Main_image_url" = $4,
+      "apple_id" = NULL,
+      "google_id" = NULL,
+      "Bio" = $3
+      WHERE "UID" = $1;`
+    const requirements = [user.UID,random,deleted,imageUrl]
+    await queryDatabase(query,requirements)
+
         // Respond with success message
-	    
-	
-        return res.json({ message: 'User successfully deleted' });
+  return res.json({ message: 'User successfully deleted' });
     } catch (error) {
         // Respond with error message
         return res.status(500).json({ message: 'Internal server error' });
     }
 }
+
+/*
+ "UID" SERIAL,
+    "Phone_number" text,
+    "First_name" text,
+    "Last_name" text,
+    "Gender" text,
+    "Gender_pref" text,
+    "Category_1_id" text DEFAULT 'Sports',
+    "Category_2_id" text DEFAULT 'Hobby',
+    "Category_3_id" text DEFAULT 'Wildcard',
+    "Category_4_id" text DEFAULT 'Food',
+    "Bio" text,
+    "Category_1_image_url" text,
+    "Category_2_image_url" text,
+    "Category_3_image_url" text,
+    "Category_4_image_url" text,
+    "DOB" date,
+    "Password" text,
+    "Phone_number_verification" text,
+    "Main_image_id" integer DEFAULT 1 NOT NULL,
+    "Main_image_url" text,
+    "Country_code" text,
+    "email" text,
+    "google_id" VARCHAR(100),
+    "apple_id" VARCHAR(100),
+    "Smoking_tag" text,
+    "Drinking_tag" text,
+    "position" point, */
 
 
 

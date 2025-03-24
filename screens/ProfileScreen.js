@@ -11,7 +11,8 @@ import { AuthContext } from '../context/AuthContext';
 const API_URL = localAddress;
 
 function Profile({userId}) {
-    const {logout} = useContext(AuthContext);
+    const {logout,userToken} = useContext(AuthContext);
+
     const navigation = useNavigation();
     const [modalVisible, setModalVisible] = useState(false);
     const [settingsModalVisible, setSettingsModalVisible] = useState(false);
@@ -61,8 +62,12 @@ function Profile({userId}) {
     useEffect(() => {
         const fetchUserData = async () => {
             try {
-                const response = await fetch(`${API_URL}/users/${userId}`, {
+                const response = await fetch(`${API_URL}/users/get-user`, {
                     method: 'GET',
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": "Bearer " + userToken,
+                    },
                 });
                 if (response.ok) {
                     const result = await response.json();
@@ -77,7 +82,7 @@ function Profile({userId}) {
         };
     
         fetchUserData();
-    }, [userId]);
+    }, [userToken]);
 
     useEffect(() => {
         if (userData) {
@@ -102,22 +107,7 @@ function Profile({userId}) {
         }
     }, [userData]);
 
-    const fetchImageAsBase64 = async (url) => {
-        if (!url) return null; 
-        try {
-            const response = await fetch(url);
-            const blob = await response.blob();
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onloadend = () => resolve(reader.result.split(',')[1]); 
-                reader.onerror = reject;
-                reader.readAsDataURL(blob); 
-            });
-        } catch (error) {
-            console.log('Error fetching image as base64:', error);
-            return null;
-        }
-    };
+   
 
     const enableLocation = async () => {
         let { status } = await Location.requestForegroundPermissionsAsync();
@@ -198,41 +188,46 @@ function Profile({userId}) {
             const response1 = await fetch(`${API_URL}/users/submit-bio`, {
                 method: 'PUT',
                 headers: {
-                    'Content-Type': 'application/json',
+                    "Content-Type": "application/json",
+                    "Authorization": "Bearer " + userToken,
                 },
                 body: JSON.stringify(data1),
             })
             const response2 = await fetch(`${API_URL}/users/submit-gender`, {
                 method: 'PUT',
                 headers: {
-                    'Content-Type': 'application/json',
+                    "Content-Type": "application/json",
+                    "Authorization": "Bearer " + userToken,
                 },
                 body: JSON.stringify(data2),
             })
             const response3 = await fetch(`${API_URL}/users/submit-preference`, {
                 method: 'PUT',
                 headers: {
-                    'Content-Type': 'application/json',
+                    "Content-Type": "application/json",
+                    "Authorization": "Bearer " + userToken,
                 },
                 body: JSON.stringify(data3),
             })
             const response4 = await fetch(`${API_URL}/users/submit-preferences`, {
                 method: 'PUT',
                 headers: {
-                    'Content-Type': 'application/json',
+                    "Content-Type": "application/json",
+                    "Authorization": "Bearer " + userToken,
                 },
                 body: JSON.stringify(data4),
             })
             const response5 = await fetch(`${API_URL}/users/submit-address`, {
                 method: 'PUT',
                 headers: {
-                    'Content-Type': 'application/json',
+                    "Content-Type": "application/json",
+                    "Authorization": "Bearer " + userToken,
                 },
                 body: JSON.stringify(data5),
             })
             for (let i = 1; i <= 4; i++) {
                 let data = {
-                    data : selectedImages[i-1].base64,
+                    data : selectedImages[i-1],
                     filename : `Category_${i}_user_${userId}.jpg`,
                     uid : userId,
                     categoryName : selectedCategory[i-1],
@@ -240,7 +235,8 @@ function Profile({userId}) {
                 let response = await fetch(`${API_URL}/images/update_category/${i}/`, {
                     method: 'PUT',
                     headers: {
-                        'Content-Type': 'application/json',
+                        "Content-Type": "application/json",
+                        "Authorization": "Bearer " + userToken,
                     },
                     body: JSON.stringify(data),
                 })
@@ -275,14 +271,16 @@ function Profile({userId}) {
                 const response1 = await fetch(`${API_URL}/users/submit-email`, {
                     method: 'PUT',
                     headers: {
-                        'Content-Type': 'application/json',
+                        "Content-Type": "application/json",
+                        "Authorization": "Bearer " + userToken,
                     },
                     body: JSON.stringify(payload1),
                 })
                 const response2 = await fetch(`${API_URL}/users/submit-password`, {
                     method: 'PUT',
                     headers: {
-                        'Content-Type': 'application/json',
+                        "Content-Type": "application/json",
+                        "Authorization": "Bearer " + userToken,
                     },
                     body: JSON.stringify(payload3),
                 })
@@ -311,14 +309,16 @@ function Profile({userId}) {
                 const response3 = await fetch(`${API_URL}/users/submit-number`, {
                     method: 'PUT',
                     headers: {
-                        'Content-Type': 'application/json',
+                        "Content-Type": "application/json",
+                        "Authorization": "Bearer " + userToken,
                     },
                     body: JSON.stringify(payload2)
                 })
                 const response4 = await fetch(`${API_URL}/users/submit-password`, {
                     method: 'PUT',
                     headers: {
-                        'Content-Type': 'application/json',
+                        "Content-Type": "application/json",
+                        "Authorization": "Bearer " + userToken,
                     },
                     body: JSON.stringify(payload4),
                 })
@@ -337,9 +337,14 @@ function Profile({userId}) {
 
     const delete1 = async () => {
         try{
-            const response = await fetch(`${API_URL}/users/delete/${userId}`)
+            const response = await fetch(`${API_URL}/users/delete-user`,{
+                method: 'GET',
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": "Bearer " + userToken,
+                }})
             if (response.ok){
-                navigation.navigate('Landing')
+                logout();
             }
             else{
                 console.log('Error')
@@ -353,35 +358,15 @@ function Profile({userId}) {
 
 
     const openUpdateProfile = () => {
-        const fetchImages = async () => {
-            const base64Images = await Promise.all([
-                fetchImageAsBase64(userData.url1),
-                fetchImageAsBase64(userData.url2),
-                fetchImageAsBase64(userData.url3),
-                fetchImageAsBase64(userData.url4),
-            ]);
-            const formattedImages = base64Images.map(image => ({ base64: image }));
-            setSelectedImages(formattedImages);
-        };
-        fetchImages();
+        const formattedImages = [userData.url1,userData.url2,userData.url3,userData.url4];
+        setSelectedImages(formattedImages);
     };
 
     // Function to handle image picking
     const handleImageUpload = async (index) => {
-        let result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.Images,
-            allowsEditing: true,
-            aspect: [4, 3],
-            quality: 0.5,
-            base64: true,
-        });
-        // console.log(result)
-        if (!result.canceled && result.assets && result.assets.length > 0) {
-            const newImages = [...selectedImages];
-            const base64String = result.assets[0].base64;
-            newImages[index] = { base64: base64String };
-            setSelectedImages(newImages);
-        }
+       
+           // setSelectedImages(newImages);
+        
     };
 
     return (
@@ -441,7 +426,7 @@ function Profile({userId}) {
                                             onPress={() => handleImageUpload(0)}
                                         >
                                             {selectedImages[0] ? (
-                                                <Image source={{ uri: `data:image/jpeg;base64,${selectedImages[0].base64}` }} style={styles.image} />
+                                                <Image source={{ uri:selectedImages[0]}} style={styles.image} />
                                             ) : (
                                                 <Text style={styles.plusText}>+</Text>
                                             )}
@@ -460,7 +445,7 @@ function Profile({userId}) {
                                             onPress={() => handleImageUpload(1)}
                                         >
                                             {selectedImages[1] ? (
-                                                <Image source={{ uri: `data:image/jpeg;base64,${selectedImages[1].base64}` }} style={styles.image} />
+                                                 <Image source={{ uri:selectedImages[1]}} style={styles.image} />
                                             ) : (
                                                 <Text style={styles.plusText}>+</Text>
                                             )}
@@ -481,7 +466,7 @@ function Profile({userId}) {
                                             onPress={() => handleImageUpload(2)}
                                         >
                                             {selectedImages[2] ? (
-                                                <Image source={{ uri: `data:image/jpeg;base64,${selectedImages[2].base64}` }} style={styles.image} />
+                                                <Image source={{ uri:selectedImages[2]}} style={styles.image} />
                                             ) : (
                                                 <Text style={styles.plusText}>+</Text>
                                             )}
@@ -500,7 +485,7 @@ function Profile({userId}) {
                                             onPress={() => handleImageUpload(3)}
                                         >
                                             {selectedImages[3] ? (
-                                                <Image source={{ uri: `data:image/jpeg;base64,${selectedImages[3].base64}` }} style={styles.image} />
+                                                <Image source={{ uri:selectedImages[3]}} style={styles.image} />
                                             ) : (
                                                 <Text style={styles.plusText}>+</Text>
                                             )}
