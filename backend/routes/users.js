@@ -8,25 +8,22 @@ const { getUserByEmail } = require('../repository/userRepo');
 
 router.post('/login', userController.login);
 
-//router.get('/:uid', userSwipeController.getUserDetails);
 
 router.get('/get-cards',passport.authenticate('jwt', { session: false }),userSwipeController.getUserCards);
 
-router.post('/:user_id/like/:target_user_id', userSwipeController.likeUser);
+router.post('/like-user',passport.authenticate('jwt', { session: false }), userSwipeController.likeUser);
 
-router.post('/:user_id/dislike/:target_user_id', userSwipeController.dislikeUser);
+router.post('/dislike-user', passport.authenticate('jwt', { session: false }),userSwipeController.dislikeUser);
 
-router.post('/:user_id/maybe', userSwipeController.addUserToMaybeList);
+router.post('/maybe-user',passport.authenticate('jwt', { session: false }), userSwipeController.addUserToMaybeList);
 
-router.post('/:user_id/maybe/:target_user_id', userSwipeController.addUserToMaybeList);
+router.get('/get-liked', passport.authenticate('jwt', { session: false }),userSwipeController.getLikedList);
 
-router.get('/:uid/liked-list', userSwipeController.getLikedList);
+router.get('/get-matches', passport.authenticate('jwt', { session: false }),userSwipeController.getMatchedList);
 
-router.get('/:uid/matched-list', userSwipeController.getMatchedList);
+router.get('/get-maybes', passport.authenticate('jwt', { session: false }),userSwipeController.getMaybeList);
 
-router.get('/:uid/maybe-list', userSwipeController.getMaybeList);
-
-router.put('/unmaybe/:uid1/:uid2', userSwipeController.removeFromMaybe);
+router.put('/remove-maybe', passport.authenticate('jwt', { session: false }),userSwipeController.removeFromMaybe);
 
 
 // Submit gender endpoint
