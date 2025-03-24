@@ -1,5 +1,5 @@
 import { ActivityIndicator, View, Text, StyleSheet, Image, TouchableOpacity, Modal, Dimensions } from 'react-native';
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect,useContext } from 'react';
 import FlipToggle from 'react-native-flip-toggle-button';
 import MultiSlider from '@ptomasroos/react-native-multi-slider';
 import { heightPercentageToDP as hp, widthPercentageToDP as wp } from 'react-native-responsive-screen';
@@ -11,11 +11,12 @@ import Card from './HomeScreenAssets/card'; // Adjust the path if needed
 import usersHard from './HomeScreenAssets/users'; // Adjust the path if needed
 import HomeBioScreen from './HomeBioScreen'; // Import the new HomeBioScreen component
 import { localAddress } from '../constants';
+import { AuthContext } from "../context/AuthContext";
 
 
 
 
-export default function HomeScreen({userId}) {
+export default function HomeScreen({}) {
     const [swipeData, setSwipeData] = useState(null);
     const [loading, setLoading] = useState(true); // Loading state
 
@@ -34,7 +35,7 @@ export default function HomeScreen({userId}) {
     const swiperRef = useRef(null);
     const [swiperKey, setSwiperKey] = useState(0);
     const [allCardsSwiped, setAllCardsSwiped] = useState(false);
-    
+    const { saveLoading,userToken,userID } = useContext(AuthContext); //change to getFirstName
     const [swipedCard, setSwipedCard] = useState(null); // State to store the last swiped card
     const [swipedAction, setSwipedAction] = useState(null); // Store the action (like/maybe/dislike)
     const [canRewind, setCanRewind] = useState(true); // Control rewind availability
@@ -43,11 +44,21 @@ export default function HomeScreen({userId}) {
 
 
     useFocusEffect(
+       
         React.useCallback(() => {
+            saveLoading(false);
+            const requestOptions = {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": "Bearer " + userToken,
+                },
+            };
             //console.log(`Fetchedered1 ${swipeData} cards`);
-          fetch(`${localAddress}/users/${userId}/cards`)
+          fetch(`${localAddress}/users/get-cards`,requestOptions)
             .then(response => response.json())
             .then(data => {
+              console.log('data',data)
               if (data && data.length > 0) {
                 setSwipeData(data);  // Make sure there are cards
                 setCurrentIndex(0);  // Reset the index on data load
@@ -63,7 +74,7 @@ export default function HomeScreen({userId}) {
               console.error(`Error fetching data: ${error}`);
               setLoading(false);  // Stop loading in case of error
             });
-        }, [userId])
+        }, [userID])
       );
       
 
@@ -102,7 +113,7 @@ export default function HomeScreen({userId}) {
     // POST and DELETE request functions
     const postAction = async (user, action) => {
         try {
-            const response = await fetch(`${localAddress}/users/${userId}/${action}/${user.UID}`, {
+            const response = await fetch(`${localAddress}/users/${userID}/${action}/${user.UID}`, {
                 method: 'POST',
             });
     
@@ -463,7 +474,7 @@ export default function HomeScreen({userId}) {
             {showProfile ? (
                 // Display HomeBioScreen if showProfile is true
                 <HomeBioScreen
-                loggedInUserId={userId}
+                loggedInUserId={userID}
                 user={currentUser}
                 
                 onClose={handleCloseProfile}

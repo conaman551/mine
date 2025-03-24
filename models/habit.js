@@ -10,7 +10,7 @@ const API_URL = localAddress
 function Habit() {
     
     const navigation = useNavigation();
-    const { saveLoading,userID,saveRegScreen } = useContext(AuthContext); //change to getFirstName
+    const { saveLoading,userToken,saveRegScreen } = useContext(AuthContext); //change to getFirstName
     const [drinking, setDrinking] = useState('');
     const [smoking, setSmoking] = useState('');
     
@@ -40,7 +40,6 @@ function Habit() {
     const handleSubmit = async () => {
         saveLoading(true);
         const data = {
-            uid : userID,
             drinking: drinking,
             smoking: smoking
         };
@@ -51,6 +50,7 @@ function Habit() {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
+                    "Authorization": "Bearer " + userToken
                 },
                 body: JSON.stringify(data),
             })

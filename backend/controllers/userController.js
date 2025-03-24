@@ -231,10 +231,13 @@ const submitCats = async (req, res) => {
 
 // Function for submitting address
 const submitAddress = async (req, res) => {
-    const { uid, latitude, longitude } = req.body;
+    const { latitude, longitude } = req.body;
     const positionString = `(${latitude}, ${longitude})`;
     console.log('position str',positionString);
-
+    const user = await getUserByEmail(req.user.email);
+    if (!user) {
+        return res.status(400).json({ error: 'User not exist' });
+    }
     if (!latitude || !longitude) {
         return res.status(400).json({ error: 'Location is required' });
     }
@@ -244,8 +247,8 @@ const submitAddress = async (req, res) => {
        await db.client.query(
         `UPDATE "users"
         SET "position"=$1
-        WHERE "UID"=$2`
-            ,[positionString,uid])
+        WHERE "email"=$2`
+            ,[positionString,user.email])
 
         // Respond with success message
         return res.json({ message: 'Address successfully updated' });
@@ -328,8 +331,11 @@ const checkCode = async (req, res) => {
 
 // Function for submitting bio
 const submitBio = async (req, res) => {
-    const { uid, bio } = req.body;
-
+    const { bio } = req.body;
+    const user = await getUserByEmail(req.user.email);
+    if (!user) {
+        return res.status(400).json({ error: 'User not exist' });
+    }
     if (!bio) {
         return res.status(400).json({ error: 'Bio is required' });
     }
@@ -339,8 +345,8 @@ const submitBio = async (req, res) => {
         await db.client.query(
         `UPDATE "users"
         SET "Bio"=$1
-        WHERE "UID"=$2`
-            , [bio, uid])
+        WHERE "email"=$2`
+            , [bio, user.email])
 
         // Respond with a success message
         return res.json({ message: 'Bio successfully updated' });
@@ -354,8 +360,11 @@ const submitBio = async (req, res) => {
 
 // Function for submitting habits
 const submitPreferences = async (req, res) => {
-    const { uid, drinking, smoking } = req.body;
-
+    const { drinking, smoking } = req.body;
+    const user = await getUserByEmail(req.user.email);
+    if (!user) {
+        return res.status(400).json({ error: 'User not exist' });
+    }
     if (drinking === undefined || smoking === undefined) {
         return res.status(400).json({ error: 'Both drinking and smoking preferences are required' });
     }
@@ -366,8 +375,8 @@ const submitPreferences = async (req, res) => {
         await db.client.query(
             `UPDATE "users"
             SET "Smoking_tag"=$1, "Drinking_tag"=$2
-            WHERE "UID"=$3`
-                , [smoking, drinking, uid])
+            WHERE "email"=$3`
+                , [smoking, drinking, user.email])
           
         // Respond with a success message
         return res.json({ message: 'Preferences successfully updated' });
@@ -379,20 +388,24 @@ const submitPreferences = async (req, res) => {
 
 
 const submitUser = async (req, res) => {
-    const { uid } = req.body;
+  // const { uid } = req.body;
+   const user = await getUserByEmail(req.user.email);
+   if (!user) {
+       return res.status(400).json({ error: 'User not exist' });
+   }
 
     try {
         // Update database
-        const result = await db.client.query(
+       await db.client.query(
         `UPDATE "users"
         SET "Valid"=TRUE
-        WHERE "UID"=$1`
-            , [uid])
+        WHERE "email"=$1`
+            , [user.email])
 
-        const result2 = await db.client.query(
+        await db.client.query(
         `INSERT INTO "ACTIVE_FILTERS" ("UID")
         VALUES ($1)`
-            , [uid]);
+            , [user.UID]);
 
         // Respond with a success message
         return res.json({ message: 'User successfully validated' });

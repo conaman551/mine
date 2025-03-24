@@ -1,8 +1,13 @@
 const db = require('../database_connector/databaseConnection');
+const { getUserByEmail } = require('../repository/userRepo');
 
 
 // Haversine formula
-const calculateDistance = (lat1, lon1, lat2, lon2) => {
+const calculateDistance = (pos1, pos2) => {
+    const lat1 = pos1.x;
+    const lat2 = pos2.x;
+    const lon1 = pos1.y;
+    const lon2 = pos2.y;
     const R = 6371; // Radius of the Earth in kilometers
     const dLat = (lat2 - lat1) * (Math.PI / 180);
     const dLon = (lon2 - lon1) * (Math.PI / 180);
@@ -48,8 +53,11 @@ const getUserDetails = async (req, res) => {
 
 
 const getUserCards = async (req, res) => {
-    const { uid, ___ } = req.params;
-	const currentUserId = uid;
+    const user = await getUserByEmail(req.user.email);
+    if (!user) {
+        return res.status(400).json({ error: 'User not exist' });
+    }
+	const currentUserId = user.UID;
 	try {
         // Get the current user's filters
         const filterQuery = `SELECT * FROM "ACTIVE_FILTERS" WHERE "UID" = $1`;
@@ -63,7 +71,7 @@ const getUserCards = async (req, res) => {
         const { Minimum_age, Maximum_age, Minimum_distance, Maximum_distance, Preference } = userFilters;
 
         // Get current user's location, age, gender, and gender preference
-        const currentUserQuery = `SELECT "Latitude", "Longitude", EXTRACT(YEAR FROM AGE("DOB")) AS age, "Gender", "Gender_pref" 
+        const currentUserQuery = `SELECT "position", EXTRACT(YEAR FROM AGE("DOB")) AS age, "Gender", "Gender_pref" 
                                   FROM "users" WHERE "UID" = $1`;
         const currentUserResult = await db.client.query(currentUserQuery, [currentUserId]);
         const currentUser = currentUserResult.rows[0];
@@ -72,7 +80,7 @@ const getUserCards = async (req, res) => {
             return res.status(404).json({ error: 'Current user not found.' });
         }
 
-        const { Latitude: currentUserLat, Longitude: currentUserLong, age: currentUserAge, Gender: currentUserGender, Gender_pref: currentUserGenderPref } = currentUser;
+        const { position:posit, age: currentUserAge, Gender: currentUserGender, Gender_pref: currentUserGenderPref } = currentUser;
 
         // Get potential users who match the age range and gender preference
         const potentialUsersQuery = `
@@ -80,8 +88,7 @@ const getUserCards = async (req, res) => {
                 "users"."UID", 
                 "users"."First_name", 
                 "users"."Last_name", 
-                "users"."Latitude", 
-                "users"."Longitude", 
+                "users"."position",  
                 EXTRACT(YEAR FROM AGE("users"."DOB")) AS age, 
                 "users"."Gender", 
                 "users"."Gender_pref",
@@ -127,7 +134,7 @@ const getUserCards = async (req, res) => {
         // Calculate distance for each potential user and filter by distance
         potentialUsers = potentialUsers
             .map(user => {
-                const distance = calculateDistance(currentUserLat, currentUserLong, user.Latitude, user.Longitude);
+                const distance = calculateDistance(posit, user.position);
                 console.log(distance)
                 return { ...user, distance: distance.toFixed(2) }; 
             })
@@ -314,8 +321,7 @@ const getMaybeList = async (req, res) => {
                 "users"."UID", 
                 "users"."First_name", 
                 "users"."Last_name", 
-                "users"."Latitude", 
-                "users"."Longitude", 
+                "users"."position", 
                 "users"."Main_image_id",
 		"users"."Category_1_image_url",
                 EXTRACT(YEAR FROM AGE("users"."DOB")) AS "Age"
@@ -360,8 +366,7 @@ const getLikedList = async (req, res) => {
                 "users"."UID", 
                 "users"."First_name", 
                 "users"."Last_name", 
-                "users"."Latitude", 
-                "users"."Longitude", 
+                "users"."position", 
                 "users"."Main_image_id",
 		"users"."Category_1_image_url",
                 EXTRACT(YEAR FROM AGE("users"."DOB")) AS "Age"
@@ -403,8 +408,7 @@ const getMatchedList = async (req, res) => {
                 "users"."UID", 
                 "users"."First_name", 
                 "users"."Last_name", 
-                "users"."Latitude", 
-                "users"."Longitude", 
+                "users"."position", 
                 "users"."Main_image_id",
                 EXTRACT(YEAR FROM AGE("users"."DOB")) AS "Age"
             FROM "users"

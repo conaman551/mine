@@ -134,7 +134,8 @@ function Photo({}) {
     })
     saveLoading(false)
     if (!response.ok) {
-        console.log('Try again')
+        handleImageUpload(index);
+        Alert.alert('Upload Unsuccessful','Please try again');
         return;
         
     }

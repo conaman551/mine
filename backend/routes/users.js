@@ -10,7 +10,7 @@ router.post('/login', userController.login);
 
 //router.get('/:uid', userSwipeController.getUserDetails);
 
-router.get('/:uid/cards', userSwipeController.getUserCards);
+router.get('/get-cards',passport.authenticate('jwt', { session: false }),userSwipeController.getUserCards);
 
 router.post('/:user_id/like/:target_user_id', userSwipeController.likeUser);
 
@@ -37,7 +37,7 @@ router.put('/submit-password',userController.submitPassword);
 
 router.put('/submit-preference', passport.authenticate('jwt', { session: false }),userController.submitPreference);
 router.put('/submit-cats', passport.authenticate('jwt', { session: false }),userController.submitCats);
-router.put('/submit-address', userController.submitAddress);
+router.put('/submit-address',  passport.authenticate('jwt', { session: false }),userController.submitAddress);
 router.put('/submit-number', userController.submitNumber);
 router.put('/submit-email', userController.sendEmail);
 router.post('/check-code', userController.checkCode);

@@ -10,7 +10,7 @@ import { AuthContext } from "../context/AuthContext";
 const API_URL = localAddress
 
 function Userlocation({}) {
-    const { saveLoading,userID,saveRegScreen } = useContext(AuthContext); //change to getFirstName
+    const { saveLoading,userToken,saveRegScreen } = useContext(AuthContext); //change to getFirstName
     const navigation = useNavigation();
     const [location, setLocation] = useState(null);
     const [address, setAddress] = useState(null);
@@ -72,7 +72,7 @@ function Userlocation({}) {
     const handleSubmit = async () => {
         saveLoading(true)
         const data = {
-            uid : userID,
+      
             latitude: location?.latitude,
             longitude: location?.longitude,
         };
@@ -83,6 +83,7 @@ function Userlocation({}) {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
+                    "Authorization": "Bearer " + userToken
                 },
                 body: JSON.stringify(data),
             })

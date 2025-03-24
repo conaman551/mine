@@ -65,14 +65,13 @@ function Confirm({ route }) {
 
         saveLoading(true);
 
-        const data = {
-            uid : userID,
-        };
+        const data = {};
         try{
             const responseValid = await fetch(`${API_URL}/users/submit-user`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
+                    "Authorization": "Bearer " + userToken
                 },
                 body: JSON.stringify(data),
             })

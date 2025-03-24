@@ -9,7 +9,7 @@ import { AuthContext } from "../context/AuthContext";
 const API_URL = localAddress
 
 function Bio() {
-    const { saveLoading,userID,saveRegScreen } = useContext(AuthContext); //change to getFirstName
+    const { saveLoading,userToken,saveRegScreen } = useContext(AuthContext); //change to getFirstName
     const navigation = useNavigation();
     const [bio, setBio] = useState('');
     const dismissKeyboard = () => {
@@ -38,7 +38,6 @@ function Bio() {
     const handleSubmit = async () => {
         saveLoading(true);
         const data = {
-            uid : userID,
             bio : bio
         };
         console.log(bio) //To remove
@@ -47,6 +46,7 @@ function Bio() {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
+                    "Authorization": "Bearer " + userToken
                 },
                 body: JSON.stringify(data),
             })
